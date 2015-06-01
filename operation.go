@@ -17,11 +17,27 @@ type Operation struct {
 	name        string
 	description string
 	handler     Handler
+	schemes     []string
 }
 
 func NewOperation(handler Handler) *Operation {
 	return &Operation{
 		handler: handler,
 	}
+}
+
+// Schemes is not additive, meaning that it'll reset the schemes
+// already defined with what it's been given if they are valid.
+func (o *Operation) Schemes(s ...string) *Operation {
+	schemes(o, s)
+	return o
+}
+
+func (o *Operation) GetSchemes() []string {
+	return o.schemes
+}
+
+func (o *Operation) setSchemes(schemes []string) {
+	o.schemes = schemes
 }
 
