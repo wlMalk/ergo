@@ -15,3 +15,8 @@ func (e *Ergo) Schemes(s ...string) *Ergo {
 	return e
 }
 
+func (e *Ergo) Consumes(mimes ...string) *Ergo {
+	consumes(e, mimes)
+	return e
+}
+

@@ -70,7 +70,17 @@ func (r *Route) GetSchemes() []string {
 	return r.schemes
 }
 
+// GetConsumes returns the consumable content types
+// passed from the parent.
+func (r *Route) GetConsumes() []string {
+	return r.consumes
+}
+
 func (r *Route) setSchemes(schemes []string) {
 	r.schemes = schemes
+}
+
+func (r *Route) setConsumes(consumes []string) {
+	r.consumes = consumes
 }
 

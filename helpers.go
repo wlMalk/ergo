@@ -43,3 +43,21 @@ func schemes(s schemer, schemes []string) {
 	}
 }
 
+type consumer interface {
+	GetConsumes() []string
+	setConsumes([]string)
+}
+
+func consumes(c consumer, mimes []string) {
+	mimes = prepareArgsSlice(mimes, func(mime string) bool {
+		if mime == MIME_JSON ||
+			mime == MIME_XML {
+			return true
+		}
+		return false
+	})
+	if len(mimes) > 0 {
+		c.setConsumes(mimes)
+	}
+}
+
