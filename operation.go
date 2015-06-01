@@ -68,6 +68,24 @@ func HandleDELETE(handler Handler) *Operation {
 	return NewOperation(handler).Method(METHOD_DELETE)
 }
 
+func (o *Operation) Description(description string) *Operation {
+	o.description = description
+	return o
+}
+
+func (o *Operation) GetDescription() string {
+	return o.description
+}
+
+func (o *Operation) Method(method string) *Operation {
+	o.method = method
+	return o
+}
+
+func (o *Operation) GetMethod() string {
+	return o.method
+}
+
 // Schemes is not additive, meaning that it'll reset the schemes
 // already defined with what it's been given if they are valid.
 func (o *Operation) Schemes(s ...string) *Operation {
