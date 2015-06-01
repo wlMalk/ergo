@@ -19,6 +19,7 @@ type Operation struct {
 	handler     Handler
 	schemes     []string
 	consumes    []string
+	produces    []string
 }
 
 func NewOperation(handler Handler) *Operation {
@@ -39,12 +40,21 @@ func (o *Operation) Consumes(mimes ...string) *Operation {
 	return o
 }
 
+func (o *Operation) Produces(mimes ...string) *Operation {
+	produces(o, mimes)
+	return o
+}
+
 func (o *Operation) GetSchemes() []string {
 	return o.schemes
 }
 
 func (o *Operation) GetConsumes() []string {
 	return o.consumes
+}
+
+func (o *Operation) GetProduces() []string {
+	return o.produces
 }
 
 func (o *Operation) setSchemes(schemes []string) {
@@ -55,3 +65,6 @@ func (o *Operation) setConsumes(mimes []string) {
 	o.consumes = mimes
 }
 
+func (o *Operation) setProduces(mimes []string) {
+	o.produces = mimes
+}
