@@ -28,6 +28,46 @@ func NewOperation(handler Handler) *Operation {
 	}
 }
 
+func ANY(function HandlerFunc) *Operation {
+	return HandleANY(HandlerFunc(function))
+}
+
+func HandleANY(handler Handler) *Operation {
+	return NewOperation(handler).Method(METHOD_ANY)
+}
+
+func GET(function HandlerFunc) *Operation {
+	return HandleGET(HandlerFunc(function))
+}
+
+func HandleGET(handler Handler) *Operation {
+	return NewOperation(handler).Method(METHOD_GET)
+}
+
+func POST(function HandlerFunc) *Operation {
+	return HandlePOST(HandlerFunc(function))
+}
+
+func HandlePOST(handler Handler) *Operation {
+	return NewOperation(handler).Method(METHOD_POST)
+}
+
+func PUT(function HandlerFunc) *Operation {
+	return HandlePUT(HandlerFunc(function))
+}
+
+func HandlePUT(handler Handler) *Operation {
+	return NewOperation(handler).Method(METHOD_PUT)
+}
+
+func DELETE(function HandlerFunc) *Operation {
+	return HandleDELETE(HandlerFunc(function))
+}
+
+func HandleDELETE(handler Handler) *Operation {
+	return NewOperation(handler).Method(METHOD_DELETE)
+}
+
 // Schemes is not additive, meaning that it'll reset the schemes
 // already defined with what it's been given if they are valid.
 func (o *Operation) Schemes(s ...string) *Operation {
