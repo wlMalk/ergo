@@ -8,6 +8,7 @@ type Route struct {
 	path        string
 	description string
 	routes      map[string]*Route
+	notFoundHandler Handler
 }
 
 func NewRoute(path string) *Route {
@@ -80,6 +81,25 @@ func (r *Route) GetConsumes() []string {
 // passed from the parent.
 func (r *Route) GetProduces() []string {
 	return r.produces
+}
+
+// NotFoundHandler sets the handler used when an operation is not found
+// in the route, when a subroute could not be found.
+func (r *Route) NotFoundHandler(h Handler) *Route {
+	r.notFoundHandler = h
+	return r
+}
+
+// GetNotFoundHandler returns the handler set in the route.
+// If it is nil and t is true then it will try and look for handler in a parent.
+func (r *Route) GetNotFoundHandler(t bool) Handler {
+	if r.notFoundHandler == nil {
+		if t {
+			return r.parent.GetNotFoundHandler(t)
+		}
+		return nil
+	}
+	return r.notFoundHandler
 }
 
 func (r *Route) setSchemes(schemes []string) {
