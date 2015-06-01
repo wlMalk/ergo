@@ -20,3 +20,8 @@ func (e *Ergo) Consumes(mimes ...string) *Ergo {
 	return e
 }
 
+func (e *Ergo) Produces(mimes ...string) *Ergo {
+	produces(e, mimes)
+	return e
+}
+

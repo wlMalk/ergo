@@ -61,3 +61,21 @@ func consumes(c consumer, mimes []string) {
 	}
 }
 
+type producer interface {
+	GetProduces() []string
+	setProduces([]string)
+}
+
+func produces(p producer, mimes []string) {
+	mimes = prepareArgsSlice(mimes, func(mime string) bool {
+		if mime == MIME_JSON ||
+			mime == MIME_XML {
+			return true
+		}
+		return false
+	})
+	if len(mimes) > 0 {
+		p.setProduces(mimes)
+	}
+}
+

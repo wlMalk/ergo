@@ -76,11 +76,21 @@ func (r *Route) GetConsumes() []string {
 	return r.consumes
 }
 
+// GetProduces returns the producible content types
+// passed from the parent.
+func (r *Route) GetProduces() []string {
+	return r.produces
+}
+
 func (r *Route) setSchemes(schemes []string) {
 	r.schemes = schemes
 }
 
 func (r *Route) setConsumes(consumes []string) {
 	r.consumes = consumes
+}
+
+func (r *Route) setProduces(produces []string) {
+	r.produces = produces
 }
 
