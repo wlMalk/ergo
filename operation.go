@@ -18,6 +18,7 @@ type Operation struct {
 	description string
 	handler     Handler
 	schemes     []string
+	consumes    []string
 }
 
 func NewOperation(handler Handler) *Operation {
@@ -33,11 +34,24 @@ func (o *Operation) Schemes(s ...string) *Operation {
 	return o
 }
 
+func (o *Operation) Consumes(mimes ...string) *Operation {
+	consumes(o, mimes)
+	return o
+}
+
 func (o *Operation) GetSchemes() []string {
 	return o.schemes
 }
 
+func (o *Operation) GetConsumes() []string {
+	return o.consumes
+}
+
 func (o *Operation) setSchemes(schemes []string) {
 	o.schemes = schemes
+}
+
+func (o *Operation) setConsumes(mimes []string) {
+	o.consumes = mimes
 }
 
