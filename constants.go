@@ -1,6 +1,11 @@
 package ergo
 
 const (
+	IN_PATH = iota
+	IN_QUERY
+	IN_HEADER
+	IN_BODY
+
 	METHOD_ANY    = ""
 	METHOD_GET    = "GET"
 	METHOD_POST   = "POST"
