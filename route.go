@@ -17,3 +17,13 @@ func NewRoute(path string) *Route {
 	}
 }
 
+// GetSchemes returns the default schemes passed from
+// the parent.
+func (r *Route) GetSchemes() []string {
+	return r.schemes
+}
+
+func (r *Route) setSchemes(schemes []string) {
+	r.schemes = schemes
+}
+

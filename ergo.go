@@ -10,3 +10,8 @@ func New(path string) *Ergo {
 	}
 }
 
+func (e *Ergo) Schemes(s ...string) *Ergo {
+	schemes(e, s)
+	return e
+}
+
