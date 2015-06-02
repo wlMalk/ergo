@@ -50,3 +50,8 @@ func (e *Ergo) IgnoreParamsBut(params ...string) *Ergo {
 	return e
 }
 
+func (e *Ergo) NotFoundHandler(h Handler) *Ergo {
+	e.Route.notFoundHandler = h
+	return e
+}
+
