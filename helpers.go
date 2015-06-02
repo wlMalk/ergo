@@ -4,6 +4,45 @@ import (
 	"strings"
 )
 
+type paramer interface {
+	GetParams() map[string]*Param
+	setParams(map[string]*Param)
+	GetParamsSlice() []*Param
+	setParamsSlice(...*Param)
+}
+
+// addParams is additive, meaning that it will keep adding
+// params as long as they are different in names.
+// No two params can share the same name even if they are
+// in different places.
+func addParams(pa paramer, params ...*Param) {
+	ps := pa.GetParamsSlice()
+	for _, p := range params {
+		ps = append(ps, p)
+	}
+	pa.setParamsSlice(ps...)
+}
+
+func ignoreParams(pa paramer, params ...string) {
+	ps := pa.GetParams()
+	for _, p := range params {
+		delete(ps, p)
+	}
+	pa.setParams(ps)
+}
+
+func ignoreParamsBut(pa paramer, params ...string) {
+	nparams := map[string]*Param{}
+	ps := pa.GetParams()
+	for _, p := range params {
+		n, ok := ps[p]
+		if ok {
+			nparams[p] = n
+		}
+	}
+	pa.setParams(nparams)
+}
+
 func prepareArgsSlice(args []string, f func(s string) bool) []string {
 	if len(args) == 0 {
 		return args

@@ -25,3 +25,28 @@ func (e *Ergo) Produces(mimes ...string) *Ergo {
 	return e
 }
 
+func (e *Ergo) Params(params ...*Param) *Ergo {
+	addParams(e, params...)
+	return e
+}
+
+func (e *Ergo) ResetParams(params ...*Param) *Ergo {
+	e.setParamsSlice(params...)
+	return e
+}
+
+func (e *Ergo) SetParams(params map[string]*Param) *Ergo {
+	e.setParams(params)
+	return e
+}
+
+func (e *Ergo) IgnoreParams(params ...string) *Ergo {
+	ignoreParams(e, params...)
+	return e
+}
+
+func (e *Ergo) IgnoreParamsBut(params ...string) *Ergo {
+	ignoreParamsBut(e, params...)
+	return e
+}
+
