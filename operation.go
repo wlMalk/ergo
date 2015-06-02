@@ -17,6 +17,7 @@ type Operation struct {
 	name        string
 	description string
 	handler     Handler
+	params      map[string]*Param
 	schemes     []string
 	consumes    []string
 	produces    []string
@@ -25,6 +26,7 @@ type Operation struct {
 func NewOperation(handler Handler) *Operation {
 	return &Operation{
 		handler: handler,
+		params:  map[string]*Param{},
 	}
 }
 
@@ -115,6 +117,43 @@ func (o *Operation) GetProduces() []string {
 	return o.produces
 }
 
+func (o *Operation) Params(params ...*Param) *Operation {
+	addParams(o, params...)
+	return o
+}
+
+func (o *Operation) GetParams() map[string]*Param {
+	return o.params
+}
+
+func (o *Operation) GetParamsSlice() []*Param {
+	var params []*Param
+	for _, p := range o.params {
+		params = append(params, p)
+	}
+	return params
+}
+
+func (o *Operation) ResetParams(params ...*Param) *Operation {
+	o.setParamsSlice(params...)
+	return o
+}
+
+func (o *Operation) SetParams(params map[string]*Param) *Operation {
+	o.setParams(params)
+	return o
+}
+
+func (o *Operation) IgnoreParams(params ...string) *Operation {
+	ignoreParams(o, params...)
+	return o
+}
+
+func (o *Operation) IgnoreParamsBut(params ...string) *Operation {
+	ignoreParamsBut(o, params...)
+	return o
+}
+
 func (o *Operation) setSchemes(schemes []string) {
 	o.schemes = schemes
 }
@@ -125,4 +164,19 @@ func (o *Operation) setConsumes(mimes []string) {
 
 func (o *Operation) setProduces(mimes []string) {
 	o.produces = mimes
+}
+
+func (o *Operation) setParams(params map[string]*Param) {
+	if params == nil {
+		params = make(map[string]*Param)
+	}
+	o.params = params
+}
+
+func (o *Operation) setParamsSlice(params ...*Param) {
+	paramsMap := map[string]*Param{}
+	for _, p := range params {
+		o.params[p.name] = p
+	}
+	o.setParams(paramsMap)
 }
