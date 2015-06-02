@@ -264,6 +264,23 @@ func (r *Route) GetNotFoundHandler(t bool) Handler {
 	return r.notFoundHandler
 }
 
+// Copy returns a pointer to a copy of the route.
+// It does not copy parent, operations, nor deep-copy the params.
+func (r *Route) Copy() *Route {
+	route := NewRoute(r.path)
+	route.name = r.name
+	route.description = r.description
+	for _, cr := range r.routes {
+		route.AddRoute(cr)
+	}
+	route.params = r.params
+	route.schemes = r.schemes
+	route.consumes = r.consumes
+	route.produces = r.produces
+	route.notFoundHandler = r.notFoundHandler
+	return route
+}
+
 func (r *Route) addRoute(route *Route) {
 	_, ok := r.routes[route.path]
 	if ok {
