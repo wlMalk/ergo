@@ -1,22 +1,32 @@
 package ergo
 
+import (
+	"fmt"
+)
+
 // Route
 
 type Route struct {
-	parent      *Route
-	name        string
-	path        string
-	description string
-	routes      map[string]*Route
+	parent          *Route
+	name            string
+	path            string
+	description     string
+	routes          map[string]*Route
+	indexSlice      []string
+	indexMap        map[string]int
 	params          map[string]*Param
+	schemes         []string
+	consumes        []string
+	produces        []string
 	notFoundHandler Handler
 }
 
 func NewRoute(path string) *Route {
 	return &Route{
-		path:     path,
-		routes:   map[string]*Route{},
+		path:       preparePath(path),
+		routes:     map[string]*Route{},
 		params:     map[string]*Param{},
+		indexMap:   map[string]int{},
 	}
 }
 
@@ -62,9 +72,49 @@ func (r *Route) GetFullPath() string {
 	return r.path
 }
 
+// New creates a route with the provided path and adds it
+// to r then returns a pointer to it.
+func (r *Route) New(path string) *Route {
+	route := NewRoute(path)
+	r.addRoute(route)
+	return route
+}
+
+// AddRoute copies and add the given route then returns
+// a pointer to the added one.
+func (r *Route) AddRoute(route *Route) *Route {
+	nroute := route.Copy()
+	r.addRoute(nroute)
+	return nroute
+}
+
+// AddRoutes copies and add every Route in routes.
+func (r *Route) AddRoutes(routes ...*Route) *Route {
+	for _, nr := range routes {
+		r.AddRoute(nr)
+	}
+	return r
+}
+
 // GetRoutes returns the map of child routes.
 func (r *Route) GetRoutes() map[string]*Route {
 	return r.routes
+}
+
+// GetRoutesSlice returns a slice of child routes
+// based on the order in which it was added.
+func (r *Route) GetRoutesSlice() []*Route {
+	var routes []*Route
+	for _, s := range r.indexSlice {
+		routes = append(routes, r.routes[s])
+	}
+	return routes
+}
+
+// SetRoutes replaces the routes map with the given one.
+func (r *Route) SetRoutes(routes map[string]*Route) *Route {
+	r.routes = routes
+	return r
 }
 
 // GetSchemes returns the default schemes passed from
@@ -142,6 +192,18 @@ func (r *Route) GetNotFoundHandler(t bool) Handler {
 		return nil
 	}
 	return r.notFoundHandler
+}
+
+func (r *Route) addRoute(route *Route) {
+	_, ok := r.routes[route.path]
+	if ok {
+		panic(fmt.Sprintf("A route with the path \"%s\" already exists.", route.path))
+	}
+	route.parent = r
+	setChild(r, route)
+	r.indexSlice = append(r.indexSlice, route.path)
+	r.indexMap[route.path] = len(r.indexSlice) - 1
+	r.routes[route.path] = route
 }
 
 func (r *Route) setSchemes(schemes []string) {

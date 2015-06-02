@@ -4,6 +4,14 @@ import (
 	"strings"
 )
 
+func preparePath(path string) string {
+	path = strings.Trim(path, "/")
+	if path != "" {
+		path = "/" + strings.ToLower(path)
+	}
+	return path
+}
+
 type paramer interface {
 	GetParams() map[string]*Param
 	setParams(map[string]*Param)
@@ -116,5 +124,19 @@ func produces(p producer, mimes []string) {
 	if len(mimes) > 0 {
 		p.setProduces(mimes)
 	}
+}
+
+type childer interface {
+	paramer
+	schemer
+	consumer
+	producer
+}
+
+func setChild(r *Route, child childer) {
+	child.setParams(r.GetParams())
+	child.setSchemes(r.GetSchemes())
+	child.setConsumes(r.GetConsumes())
+	child.setProduces(r.GetProduces())
 }
 
