@@ -1,6 +1,13 @@
 package ergo
 
 const (
+	PARAM_STRING = iota
+	PARAM_INT
+	PARAM_INT64
+	PARAM_FLOAT
+	PARAM_FLOAT64
+	PARAM_BOOL
+
 	IN_PATH = iota
 	IN_QUERY
 	IN_HEADER
