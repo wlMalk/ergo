@@ -1,5 +1,9 @@
 package ergo
 
+import (
+	"strconv"
+)
+
 // Param
 
 type Param struct {
@@ -90,3 +94,86 @@ func (p *Param) In(in ...int) *Param {
 	return p
 }
 
+type ParamValue struct {
+	name             string
+	value            interface{}
+	strValue         string
+	as               int
+	strMultipleValue []string
+	multiple         bool
+	from             string
+}
+
+func NewParamValue(name string, value string, from string) *ParamValue {
+	return &ParamValue{
+		name:     name,
+		strValue: value,
+		from:     from,
+	}
+}
+
+func NewMultipleParamValue(name string, value []string, from string) *ParamValue {
+	return &ParamValue{
+		name:             name,
+		strMultipleValue: value,
+		multiple:         true,
+		from:             from,
+	}
+}
+
+func (pv *ParamValue) Name() string {
+	return pv.name
+}
+
+func (pv *ParamValue) As() int {
+	return pv.as
+}
+
+func (pv *ParamValue) Value() interface{} {
+	if pv.value == nil {
+		return pv.strValue
+	}
+	return pv.value
+}
+
+func (pv *ParamValue) String() string {
+	return pv.strValue
+}
+
+func (pv *ParamValue) Bool() bool {
+	if pv.value != nil {
+		v := pv.value.(bool)
+		return v
+	}
+	if pv.as == PARAM_BOOL {
+		v, _ := strconv.ParseBool(pv.strValue)
+		pv.value = v
+		return v
+	}
+	return false
+}
+
+func (pv *ParamValue) Int() int {
+	if pv.value != nil {
+		v := pv.value.(int)
+		return v
+	}
+	if pv.as == PARAM_INT {
+		v, _ := strconv.Atoi(pv.strValue)
+		pv.value = v
+		return v
+	}
+	return 0
+}
+
+func (pv *ParamValue) Int64() int64 {
+	return 0
+}
+
+func (pv *ParamValue) Float() float32 {
+	return 0
+}
+
+func (pv *ParamValue) Float64() float64 {
+	return 0
+}
