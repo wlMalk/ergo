@@ -2,6 +2,7 @@ package ergo
 
 import (
 	"fmt"
+	"strings"
 )
 
 // Route
@@ -24,7 +25,7 @@ type Route struct {
 
 func NewRoute(path string) *Route {
 	return &Route{
-		path:       preparePath(path),
+		path:       strings.ToLower(preparePath(path)),
 		routes:     map[string]*Route{},
 		params:     map[string]*Param{},
 		indexMap:   map[string]int{},

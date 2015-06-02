@@ -7,7 +7,7 @@ import (
 func preparePath(path string) string {
 	path = strings.Trim(path, "/")
 	if path != "" {
-		path = "/" + strings.ToLower(path)
+		path = "/" + path
 	}
 	return path
 }
