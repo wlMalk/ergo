@@ -6,7 +6,13 @@ import (
 
 func expect(t *testing.T, a interface{}, b interface{}) {
 	if a != b {
-		t.Errorf("Expected %s got %s.", a, b)
+		t.Errorf("Expected %+v to equal %+v", a, b)
+	}
+}
+
+func expectNot(t *testing.T, a interface{}, b interface{}) {
+	if a == b {
+		t.Errorf("Expected %+v to not equal %+v", a, b)
 	}
 }
 
