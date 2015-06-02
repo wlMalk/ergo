@@ -39,6 +39,39 @@ func BodyParam(name string) *Param {
 	return NewParam(name).In(IN_BODY)
 }
 
+func (p *Param) Name(name string) *Param {
+	p.name = name
+	return p
+}
+
+func (p *Param) GetName() string {
+	return p.name
+}
+
+func (p *Param) Description(description string) *Param {
+	p.description = description
+	return p
+}
+
+func (p *Param) GetDescription() string {
+	return p.description
+}
+
+func (p *Param) Required() *Param {
+	p.required = true
+	return p
+}
+
+func (p *Param) File() *Param {
+	p.file = true
+	return p
+}
+
+func (p *Param) Multiple() *Param {
+	p.multiple = true
+	return p
+}
+
 // If a Param is in path then it is required.
 func (p *Param) In(in ...int) *Param {
 	for _, i := range in {
