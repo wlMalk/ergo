@@ -15,4 +15,7 @@ const (
 	SCHEME_HTTP  = "http"
 	SCHEME_HTTPS = "https"
 
+	MIME_XML  = "application/xml"
+	MIME_JSON = "application/json"
+
 )
