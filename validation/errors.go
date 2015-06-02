@@ -18,4 +18,5 @@ func (err ValidationErr) Error() string {
 
 const (
 	ErrEq     = ErrFmt("Validation Error: %v should equal %v")
+	ErrRegexp = ErrFmt("Validation Error: %v should match %v")
 )

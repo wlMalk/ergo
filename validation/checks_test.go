@@ -4,6 +4,7 @@ import (
 	"github.com/wlMalk/ergo"
 	"github.com/wlMalk/ergo/validation"
 
+	"regexp"
 	"testing"
 )
 
@@ -27,5 +28,16 @@ func TestEq(t *testing.T) {
 	expect(t, nil, err)
 	pv = ergo.NewParamValue("param", "rgo", "query")
 	err = eq.Validate(pv, req)
-	expectNot(t, nil, err)
+	expect(t, validation.ErrEq.Fmt("param", "ergo").Error(), err.Error())
+}
+
+func TestRegexp(t *testing.T) {
+	re := validation.Regexp(regexp.MustCompile("[ergo]{4}"))
+	pv := ergo.NewParamValue("param", "ergo", "query")
+	req := ergo.NewRequest(nil)
+	err := re.Validate(pv, req)
+	expect(t, nil, err)
+	pv = ergo.NewParamValue("param", "rgo", "query")
+	err = re.Validate(pv, req)
+	expectNot(t, validation.ErrRegexp.Fmt("param", "[ergo]{4}").Error(), err)
 }
