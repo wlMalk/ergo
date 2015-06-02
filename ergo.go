@@ -1,5 +1,10 @@
 package ergo
 
+import (
+	"net/http"
+	"net/url"
+)
+
 type Ergo struct {
 	*Route
 }
@@ -55,5 +60,25 @@ func (e *Ergo) NotFoundHandler(h Handler) *Ergo {
 	return e
 }
 
+func (e *Ergo) FindRouteFromURL(urlObj *url.URL) (*Route, map[string]string) {
+
+	return nil, nil
+}
+
 func (e *Ergo) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	prepared := preparePath(r.URL.Path)
+	if r.URL.Path != prepared && (r.Method == "GET" || r.Method == "") {
+		r.URL.Path = prepared
+		http.Redirect(w, r, r.URL.String(), http.StatusMovedPermanently)
+		return
+	}
+	r.URL.Path = prepared
+	route, pathParams := e.FindRouteFromURL(r.URL)
+	if route != nil {
+		req := NewRequest(r)
+		req.route = route
+		req.pathParams = pathParams
+		res := NewResponse(w)
+		route.ServeHTTP(res, req)
+	}
 }
