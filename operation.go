@@ -168,6 +168,9 @@ func (o *Operation) IgnoreParamsBut(params ...string) *Operation {
 	return o
 }
 
+func (o *Operation) ServeHTTP(res *Response, req *Request) {
+}
+
 func (o *Operation) setSchemes(schemes []string) {
 	o.schemes = schemes
 }

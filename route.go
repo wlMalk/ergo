@@ -265,6 +265,9 @@ func (r *Route) GetNotFoundHandler(t bool) Handler {
 	return r.notFoundHandler
 }
 
+func (r *Route) ServeHTTP(res *Response, req *Request) {
+}
+
 // Copy returns a pointer to a copy of the route.
 // It does not copy parent, operations, nor deep-copy the params.
 func (r *Route) Copy() *Route {

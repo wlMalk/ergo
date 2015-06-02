@@ -55,3 +55,5 @@ func (e *Ergo) NotFoundHandler(h Handler) *Ergo {
 	return e
 }
 
+func (e *Ergo) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+}
