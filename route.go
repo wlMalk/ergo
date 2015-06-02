@@ -18,6 +18,7 @@ type Route struct {
 	schemes         []string
 	consumes        []string
 	produces        []string
+	operations      OperationMap
 	notFoundHandler Handler
 }
 
@@ -27,6 +28,7 @@ func NewRoute(path string) *Route {
 		routes:     map[string]*Route{},
 		params:     map[string]*Param{},
 		indexMap:   map[string]int{},
+		operations: OperationMap{},
 	}
 }
 
@@ -173,6 +175,74 @@ func (r *Route) IgnoreParams(params ...string) *Route {
 func (r *Route) IgnoreParamsBut(params ...string) *Route {
 	ignoreParamsBut(r, params...)
 	return r
+}
+
+func (r *Route) ANY(function HandlerFunc) *Operation {
+	return r.HandleANY(HandlerFunc(function))
+}
+
+func (r *Route) HandleANY(handler Handler) *Operation {
+	operation := HandleANY(handler)
+	setChild(r, operation)
+	r.operations[METHOD_ANY] = operation
+	return operation
+}
+
+func (r *Route) GET(function HandlerFunc) *Operation {
+	return r.HandleGET(HandlerFunc(function))
+}
+
+func (r *Route) HandleGET(handler Handler) *Operation {
+	operation := HandleGET(handler)
+	setChild(r, operation)
+	r.operations[METHOD_GET] = operation
+	return operation
+}
+
+func (r *Route) POST(function HandlerFunc) *Operation {
+	return r.HandlePOST(HandlerFunc(function))
+}
+
+func (r *Route) HandlePOST(handler Handler) *Operation {
+	operation := HandlePOST(handler)
+	setChild(r, operation)
+	r.operations[METHOD_POST] = operation
+	return operation
+}
+
+func (r *Route) PUT(function HandlerFunc) *Operation {
+	return r.HandlePUT(HandlerFunc(function))
+}
+
+func (r *Route) HandlePUT(handler Handler) *Operation {
+	operation := HandlePUT(handler)
+	setChild(r, operation)
+	r.operations[METHOD_PUT] = operation
+	return operation
+}
+
+func (r *Route) DELETE(function HandlerFunc) *Operation {
+	return r.HandleDELETE(HandlerFunc(function))
+}
+
+func (r *Route) HandleDELETE(handler Handler) *Operation {
+	operation := HandleDELETE(handler)
+	setChild(r, operation)
+	r.operations[METHOD_DELETE] = operation
+	return operation
+}
+
+// Operations does not alter the given operations in any way,
+// it does not even add route parameters.
+func (r *Route) Operations(operations ...*Operation) *Route {
+	for _, o := range operations {
+		r.operations[o.method] = o
+	}
+	return r
+}
+
+func (r *Route) GetOperations() OperationMap {
+	return r.operations
 }
 
 // NotFoundHandler sets the handler used when an operation is not found

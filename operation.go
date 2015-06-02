@@ -1,5 +1,9 @@
 package ergo
 
+import (
+	"strings"
+)
+
 type Handler interface {
 	ServeHTTP(*Response, *Request)
 }
@@ -8,6 +12,16 @@ type HandlerFunc func(*Response, *Request)
 
 func (f HandlerFunc) ServeHTTP(w *Response, r *Request) {
 	f(w, r)
+}
+
+type OperationMap map[string]*Operation
+
+func (om OperationMap) GetOperation(method string) (*Operation, bool) {
+	o, ok := om[strings.ToUpper(method)]
+	if !ok {
+		o, ok = om[""]
+	}
+	return o, ok
 }
 
 // Operation
