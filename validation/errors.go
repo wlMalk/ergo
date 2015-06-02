@@ -16,3 +16,6 @@ func (err ValidationErr) Error() string {
 	return string(err)
 }
 
+const (
+	ErrEq     = ErrFmt("Validation Error: %v should equal %v")
+)
