@@ -22,3 +22,16 @@ func Regexp(p *regexp.Regexp) Validator {
 	})
 }
 
+func Condition(f func(Valuer, Requester) bool, validators ...Validator) Validator {
+	return ValidatorFunc(func(v Valuer, r Requester) error {
+		if f(v, r) {
+			for _, va := range validators {
+				err := va.Validate(v, r)
+				if err != nil {
+					return err
+				}
+			}
+		}
+		return nil
+	})
+}
