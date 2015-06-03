@@ -35,3 +35,24 @@ func If(f func(Valuer, Requester) bool, validators ...Validator) Validator {
 		return nil
 	})
 }
+
+func IfElse(f func(Valuer, Requester) bool, tValidators []Validator, fValidators []Validator) Validator {
+	return ValidatorFunc(func(v Valuer, r Requester) error {
+		if f(v, r) {
+			for _, va := range tValidators {
+				err := va.Validate(v, r)
+				if err != nil {
+					return err
+				}
+			}
+		} else {
+			for _, va := range fValidators {
+				err := va.Validate(v, r)
+				if err != nil {
+					return err
+				}
+			}
+		}
+		return nil
+	})
+}
