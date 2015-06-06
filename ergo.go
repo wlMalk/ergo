@@ -9,9 +9,9 @@ type Ergo struct {
 	*Route
 }
 
-func New(path string) *Ergo {
+func New() *Ergo {
 	return &Ergo{
-		Route: NewRoute(path),
+		Route: NewRoute(""),
 	}
 }
 
