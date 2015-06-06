@@ -60,7 +60,24 @@ func (e *Ergo) NotFoundHandler(h Handler) *Ergo {
 	return e
 }
 
+func (e *Ergo) Prepare() error {
+	return nil
+}
 
+func (e *Ergo) Run(address string) error {
+	err := e.Prepare()
+	if err != nil {
+		return err
+	}
+	return http.ListenAndServe(address, e)
+}
+
+func (e *Ergo) RunTLS(addr, certFile, keyFile string) error {
+	err := e.Prepare()
+	if err != nil {
+		return err
+	}
+	return http.ListenAndServeTLS(addr, certFile, keyFile, e)
 }
 
 func (e *Ergo) ServeHTTP(w http.ResponseWriter, r *http.Request) {
