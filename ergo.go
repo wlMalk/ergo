@@ -2,7 +2,7 @@ package ergo
 
 import (
 	"net/http"
-	"net/url"
+	"strings"
 )
 
 type Ergo struct {
@@ -60,25 +60,32 @@ func (e *Ergo) NotFoundHandler(h Handler) *Ergo {
 	return e
 }
 
-func (e *Ergo) FindRouteFromURL(urlObj *url.URL) (*Route, map[string]string) {
 
-	return nil, nil
 }
 
 func (e *Ergo) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	prepared := preparePath(r.URL.Path)
-	if r.URL.Path != prepared && (r.Method == "GET" || r.Method == "") {
-		r.URL.Path = prepared
+	path := preparePath(r.URL.Path)
+	if r.URL.Path != "/"+path && r.Method == "GET" {
+		r.URL.Path = "/" + path
 		http.Redirect(w, r, r.URL.String(), http.StatusMovedPermanently)
 		return
 	}
-	r.URL.Path = prepared
-	route, pathParams := e.FindRouteFromURL(r.URL)
-	if route != nil {
-		req := NewRequest(r)
-		req.route = route
-		req.pathParams = pathParams
-		res := NewResponse(w)
-		route.ServeHTTP(res, req)
+	route, rp := e.Match(path)
+	if route == nil {
+		// not found
+		return
 	}
+
+	req := NewRequest(r)
+	req.route = route
+	if len(rp) > 0 {
+		ps := strings.Split(rp[:len(rp)], ";")
+		for _, p := range ps {
+			ci := strings.Index(p, ":")
+
+			req.pathParams[p[:ci]] = p[ci+1:]
+		}
+	}
+	res := NewResponse(w)
+	route.ServeHTTP(res, req)
 }
