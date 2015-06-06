@@ -6,7 +6,7 @@ import (
 
 func expect(t *testing.T, a interface{}, b interface{}) {
 	if a != b {
-		t.Errorf("Expected %+v to equal %+v", a, b)
+		t.Errorf("Expected %+v to equal %+v", b, a)
 	}
 }
 
@@ -17,10 +17,10 @@ func expectNot(t *testing.T, a interface{}, b interface{}) {
 }
 
 func TestNewRoute(t *testing.T) {
-	e := New("/")
+	e := New()
 	v1 := e.New("/v1//")
 	usersRoute := v1.New("users")
-	postRoute := v1.New("posts/:id")
+	postRoute := v1.New("posts/{id}")
 	expect(t, "/v1/users", usersRoute.GetFullPath())
-	expect(t, "/v1/posts/:id", postRoute.GetFullPath())
+	expect(t, "/v1/posts/{id}", postRoute.GetFullPath())
 }
