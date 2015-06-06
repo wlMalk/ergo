@@ -4,6 +4,10 @@ import (
 	"strings"
 )
 
+var (
+	MaxMemory int64 = 32 << 20 // 32 MB
+)
+
 type Handler interface {
 	ServeHTTP(*Response, *Request)
 }
