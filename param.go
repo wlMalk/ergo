@@ -2,6 +2,8 @@ package ergo
 
 import (
 	"strconv"
+
+	"github.com/wlMalk/ergo/validation"
 )
 
 // Param
@@ -9,16 +11,17 @@ import (
 type Param struct {
 	name        string
 	description string
-	def      interface{}
-	as       int
-	required bool
-	multiple bool
-	strSep   string
-	file     bool
-	inPath   bool
-	inQuery  bool
-	inHeader bool
-	inBody   bool
+	validators  []validation.Validator
+	def         interface{}
+	as          int
+	required    bool
+	multiple    bool
+	strSep      string
+	file        bool
+	inPath      bool
+	inQuery     bool
+	inHeader    bool
+	inBody      bool
 }
 
 func NewParam(name string) *Param {
@@ -76,6 +79,11 @@ func (p *Param) Multiple() *Param {
 	return p
 }
 
+func (p *Param) As(as int) *Param {
+	p.as = as
+	return p
+}
+
 // If a Param is in path then it is required.
 func (p *Param) In(in ...int) *Param {
 	for _, i := range in {
@@ -92,6 +100,29 @@ func (p *Param) In(in ...int) *Param {
 		}
 	}
 	return p
+}
+
+// Validate returns the first error it encountered
+func (p *Param) Validate(pv validation.Valuer, r *Request) error {
+	for _, v := range p.validators {
+		err := v.Validate(pv, r)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// ValidateAll returns all the errors it encountered
+func (p *Param) ValidateAll(pv validation.Valuer, r *Request) []error {
+	var errs []error
+	for _, v := range p.validators {
+		err := v.Validate(pv, r)
+		if err != nil {
+			errs = append(errs, err)
+		}
+	}
+	return errs
 }
 
 type ParamValue struct {
