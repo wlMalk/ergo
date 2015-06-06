@@ -2,6 +2,7 @@ package ergo
 
 import (
 	"fmt"
+	"net/url"
 	"strings"
 )
 
@@ -268,7 +269,32 @@ func (r *Route) GetNotFoundHandler(t bool) Handler {
 	return r.notFoundHandler
 }
 
+func (r *Route) Match(path string) (*Route, string) {
+	if r.parent != nil {
+		mat, rem, par := r.match(path)
+		if !mat {
+			return nil, ""
+		}
+		if rem == "" {
+			return r, par
+		}
+		return r.subMatch(rem)
+	}
+	return r.subMatch(path)
+}
+
+func (r *Route) MatchURL(u *url.URL) (*Route, string) {
+	return r.Match(u.Path[:len(u.Path)+1])
+}
+
 func (r *Route) ServeHTTP(res *Response, req *Request) {
+	// validate the params with all the matching routes
+	o, ok := r.operations.GetOperation(req.Method)
+	if !ok {
+		// method not allowed
+		return
+	}
+	o.ServeHTTP(res, req)
 }
 
 // Copy returns a pointer to a copy of the route.
@@ -327,11 +353,11 @@ func (r *Route) setParamsSlice(params ...*Param) {
 	r.setParams(paramsMap)
 }
 
-func (r *Route) matches(path string) (bool, string, string) {
+func (r *Route) match(path string) (bool, string, string) {
 	return match(r.path, path)
 }
 
-func (r *Route) subMatches(path string) (*Route, string) {
+func (r *Route) subMatch(path string) (*Route, string) {
 	for _, route := range r.routes {
 		nr, par := route.Match(path)
 		if nr != nil {
@@ -341,17 +367,4 @@ func (r *Route) subMatches(path string) (*Route, string) {
 	return nil, ""
 }
 
-func (r *Route) Match(path string) (*Route, string) {
-	if r.parent != nil {
-		mat, rem, par := r.matches(path)
-		if !mat {
-			return nil, ""
-		}
-		if rem == "" {
-			return r, par
-		}
-		return r.subMatches(rem)
-	}
-	return r.subMatches(path)
-}
 
