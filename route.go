@@ -64,15 +64,18 @@ func (r *Route) Description(description string) *Route {
 // GetPath returns the relative path of the route to the
 // parent route.
 func (r *Route) GetPath() string {
-	return r.path
+	if r.parent != nil {
+		return "/" + r.path
+	}
+	return ""
 }
 
 // GetFullPath returns the absolute path of the route.
 func (r *Route) GetFullPath() string {
 	if r.parent != nil {
-		return r.parent.GetFullPath() + r.path
+		return r.parent.GetFullPath() + r.GetPath()
 	}
-	return r.path
+	return r.GetPath()
 }
 
 // New creates a route with the provided path and adds it
