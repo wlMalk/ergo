@@ -326,3 +326,32 @@ func (r *Route) setParamsSlice(params ...*Param) {
 	}
 	r.setParams(paramsMap)
 }
+
+func (r *Route) matches(path string) (bool, string, string) {
+	return match(r.path, path)
+}
+
+func (r *Route) subMatches(path string) (*Route, string) {
+	for _, route := range r.routes {
+		nr, par := route.Match(path)
+		if nr != nil {
+			return nr, par
+		}
+	}
+	return nil, ""
+}
+
+func (r *Route) Match(path string) (*Route, string) {
+	if r.parent != nil {
+		mat, rem, par := r.matches(path)
+		if !mat {
+			return nil, ""
+		}
+		if rem == "" {
+			return r, par
+		}
+		return r.subMatches(rem)
+	}
+	return r.subMatches(path)
+}
+
