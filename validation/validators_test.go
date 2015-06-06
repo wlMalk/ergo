@@ -10,13 +10,13 @@ import (
 
 func expect(t *testing.T, a interface{}, b interface{}) {
 	if a != b {
-		t.Errorf("Expected %+v to equal %+v", a, b)
+		t.Errorf("Expected %+v to equal %+v", b, a)
 	}
 }
 
 func expectNot(t *testing.T, a interface{}, b interface{}) {
 	if a == b {
-		t.Errorf("Expected %+v to not equal %+v", a, b)
+		t.Errorf("Expected %+v to not equal %+v", b, a)
 	}
 }
 
