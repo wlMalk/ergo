@@ -4,7 +4,12 @@ import (
 	"fmt"
 	"net/url"
 	"strings"
+
+	"github.com/wlMalk/ergo/constants"
 )
+
+type Router interface {
+}
 
 // Route
 
