@@ -136,5 +136,20 @@ func setParamer(r *Route, p paramer) {
 	p.setParams(r.GetParams())
 }
 
+func containsString(vals []string, a string) bool {
+	for _, v := range vals {
+		if a == v {
+			return true
+		}
+	}
+	return false
 }
 
+func containsInt(vals []int, a int) bool {
+	for _, v := range vals {
+		if a == v {
+			return true
+		}
+	}
+	return false
+}
