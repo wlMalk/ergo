@@ -3,6 +3,7 @@ package ergo
 import (
 	"strconv"
 
+	"github.com/wlMalk/ergo/constants"
 	"github.com/wlMalk/ergo/validation"
 )
 
@@ -31,19 +32,19 @@ func NewParam(name string) *Param {
 }
 
 func PathParam(name string) *Param {
-	return NewParam(name).In(IN_PATH)
+	return NewParam(name).In(constants.IN_PATH)
 }
 
 func QueryParam(name string) *Param {
-	return NewParam(name).In(IN_QUERY)
+	return NewParam(name).In(constants.IN_QUERY)
 }
 
 func HeaderParam(name string) *Param {
-	return NewParam(name).In(IN_HEADER)
+	return NewParam(name).In(constants.IN_HEADER)
 }
 
 func BodyParam(name string) *Param {
-	return NewParam(name).In(IN_BODY)
+	return NewParam(name).In(constants.IN_BODY)
 }
 
 func (p *Param) Name(name string) *Param {
@@ -88,14 +89,14 @@ func (p *Param) As(as int) *Param {
 func (p *Param) In(in ...int) *Param {
 	for _, i := range in {
 		switch i {
-		case IN_PATH:
+		case constants.IN_PATH:
 			p.inPath = true
 			p.required = true
-		case IN_QUERY:
+		case constants.IN_QUERY:
 			p.inQuery = true
-		case IN_HEADER:
+		case constants.IN_HEADER:
 			p.inHeader = true
-		case IN_BODY:
+		case constants.IN_BODY:
 			p.inBody = true
 		}
 	}
@@ -103,9 +104,9 @@ func (p *Param) In(in ...int) *Param {
 }
 
 // Validate returns the first error it encountered
-func (p *Param) Validate(pv validation.Valuer, r *Request) error {
+func (p *Param) Validate(pv validation.Valuer, req *Request) error {
 	for _, v := range p.validators {
-		err := v.Validate(pv, r)
+		err := v.Validate(pv, req)
 		if err != nil {
 			return err
 		}
@@ -114,10 +115,10 @@ func (p *Param) Validate(pv validation.Valuer, r *Request) error {
 }
 
 // ValidateAll returns all the errors it encountered
-func (p *Param) ValidateAll(pv validation.Valuer, r *Request) []error {
+func (p *Param) ValidateAll(pv validation.Valuer, req *Request) []error {
 	var errs []error
 	for _, v := range p.validators {
-		err := v.Validate(pv, r)
+		err := v.Validate(pv, req)
 		if err != nil {
 			errs = append(errs, err)
 		}
@@ -176,7 +177,7 @@ func (pv *ParamValue) Bool() bool {
 		v := pv.value.(bool)
 		return v
 	}
-	if pv.as == PARAM_BOOL {
+	if pv.as == constants.PARAM_BOOL {
 		v, _ := strconv.ParseBool(pv.strValue)
 		pv.value = v
 		return v
@@ -189,7 +190,7 @@ func (pv *ParamValue) Int() int {
 		v := pv.value.(int)
 		return v
 	}
-	if pv.as == PARAM_INT {
+	if pv.as == constants.PARAM_INT {
 		v, _ := strconv.Atoi(pv.strValue)
 		pv.value = v
 		return v
