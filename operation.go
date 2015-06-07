@@ -154,6 +154,10 @@ func (o *Operation) GetProduces() []string {
 	return o.produces
 }
 
+func (o *Operation) GetRoute() Router {
+	return o.route
+}
+
 func (o *Operation) Params(params ...*Param) *Operation {
 	addParams(o, params...)
 	return o
