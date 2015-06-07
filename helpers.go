@@ -2,6 +2,8 @@ package ergo
 
 import (
 	"strings"
+
+	"github.com/wlMalk/ergo/constants"
 )
 
 func preparePath(path string) string {
@@ -76,8 +78,8 @@ type schemer interface {
 
 func schemes(s schemer, schemes []string) {
 	schemes = prepareArgsSlice(schemes, func(scheme string) bool {
-		if scheme == SCHEME_HTTP ||
-			scheme == SCHEME_HTTPS {
+		if scheme == constants.SCHEME_HTTP ||
+			scheme == constants.SCHEME_HTTPS {
 			return true
 		}
 		return false
@@ -94,8 +96,8 @@ type consumer interface {
 
 func consumes(c consumer, mimes []string) {
 	mimes = prepareArgsSlice(mimes, func(mime string) bool {
-		if mime == MIME_JSON ||
-			mime == MIME_XML {
+		if mime == constants.MIME_JSON ||
+			mime == constants.MIME_XML {
 			return true
 		}
 		return false
@@ -112,8 +114,8 @@ type producer interface {
 
 func produces(p producer, mimes []string) {
 	mimes = prepareArgsSlice(mimes, func(mime string) bool {
-		if mime == MIME_JSON ||
-			mime == MIME_XML {
+		if mime == constants.MIME_JSON ||
+			mime == constants.MIME_XML {
 			return true
 		}
 		return false
@@ -123,17 +125,16 @@ func produces(p producer, mimes []string) {
 	}
 }
 
-type childer interface {
-	paramer
-	schemer
-	consumer
-	producer
+func setOperation(r *Route, o *Operation) {
+	o.setSchemes(r.ergo.GetSchemes())
+	o.setConsumes(r.ergo.GetConsumes())
+	o.setProduces(r.ergo.GetProduces())
+	setParamer(r, o)
 }
 
-func setChild(r *Route, child childer) {
-	child.setParams(r.GetParams())
-	child.setSchemes(r.GetSchemes())
-	child.setConsumes(r.GetConsumes())
-	child.setProduces(r.GetProduces())
+func setParamer(r *Route, p paramer) {
+	p.setParams(r.GetParams())
+}
+
 }
 
