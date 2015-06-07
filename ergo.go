@@ -5,6 +5,15 @@ import (
 	"strings"
 )
 
+type Ergoer interface {
+	GetSchemes() []string
+	GetConsumes() []string
+	GetProduces() []string
+	NotFound(*Response, *Request)
+	MethodNotAllowed(*Route, *Response, *Request)
+	Err(error, *Response, *Request)
+	Panic(*Response, *Request)
+}
 
 // Ergo
 
@@ -119,12 +128,15 @@ func (e *Ergo) Prepare() error {
 func (e *Ergo) NotFound(res *Response, req *Request) {
 	e.NotFoundHandler.ServeHTTP(res, req)
 }
+
 func (e *Ergo) MethodNotAllowed(r *Route, res *Response, req *Request) {
 	e.MethodNotAllowedHandler.ServeHTTP(r, res, req)
 }
+
 func (e *Ergo) Err(err error, res *Response, req *Request) {
 	e.ErrHandler.ServeHTTP(err, res, req)
 }
+
 func (e *Ergo) Panic(res *Response, req *Request) {
 	e.PanicHandler.ServeHTTP(res, req)
 }
