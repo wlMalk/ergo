@@ -5,14 +5,35 @@ import (
 	"strings"
 )
 
+
+// Ergo
+
 type Ergo struct {
-	*Route
+	root   *Route
+	router ExternalRouter
+
+	schemes  []string
+	consumes []string
+	produces []string
+
+	NotFoundHandler         Handler
+	MethodNotAllowedHandler MethodNotAllowedHandler
+	ErrHandler              ErrHandler
+	PanicHandler            Handler
 }
 
 func New() *Ergo {
-	return &Ergo{
-		Route: NewRoute(""),
+	e := &Ergo{
+		NotFoundHandler:         defaultNotFoundHandler,
+		MethodNotAllowedHandler: defaultMethodNotAllowedHandler,
+		ErrHandler:              defaultErrHandler,
+		PanicHandler:            defaultPanicHandler,
 	}
+	r := NewRoute("")
+	r.ergo = e
+	e.root = r
+	return e
+}
 }
 
 func (e *Ergo) Schemes(s ...string) *Ergo {
