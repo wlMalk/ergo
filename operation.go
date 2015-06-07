@@ -2,6 +2,8 @@ package ergo
 
 import (
 	"strings"
+
+	"github.com/wlMalk/ergo/constants"
 )
 
 var (
@@ -22,17 +24,24 @@ func (om OperationMap) GetOperation(method string) (*Operation, bool) {
 // Operation
 
 type Operation struct {
-	method      string
-	name        string
-	description string
-	handler     Handler
-	params      map[string]*Param
-	schemes     []string
-	consumes    []string
-	produces    []string
+	root          *Ergo
+	route         *Route
+	method        string
+	name          string
+	description   string
+	handler       Handler
+	params        map[string]*Param
+	schemes       []string
+	consumes      []string
+	produces      []string
+	containsFiles bool
+	bodyParams    bool
 }
 
 func NewOperation(handler Handler) *Operation {
+	if handler == nil {
+		panic("Handler cannot be nil")
+	}
 	return &Operation{
 		handler: handler,
 		params:  map[string]*Param{},
@@ -44,7 +53,7 @@ func ANY(function HandlerFunc) *Operation {
 }
 
 func HandleANY(handler Handler) *Operation {
-	return NewOperation(handler).Method(METHOD_ANY)
+	return NewOperation(handler).Method(constants.METHOD_ANY)
 }
 
 func GET(function HandlerFunc) *Operation {
@@ -52,7 +61,7 @@ func GET(function HandlerFunc) *Operation {
 }
 
 func HandleGET(handler Handler) *Operation {
-	return NewOperation(handler).Method(METHOD_GET)
+	return NewOperation(handler).Method(constants.METHOD_GET)
 }
 
 func POST(function HandlerFunc) *Operation {
@@ -60,7 +69,7 @@ func POST(function HandlerFunc) *Operation {
 }
 
 func HandlePOST(handler Handler) *Operation {
-	return NewOperation(handler).Method(METHOD_POST)
+	return NewOperation(handler).Method(constants.METHOD_POST)
 }
 
 func PUT(function HandlerFunc) *Operation {
@@ -68,7 +77,7 @@ func PUT(function HandlerFunc) *Operation {
 }
 
 func HandlePUT(handler Handler) *Operation {
-	return NewOperation(handler).Method(METHOD_PUT)
+	return NewOperation(handler).Method(constants.METHOD_PUT)
 }
 
 func DELETE(function HandlerFunc) *Operation {
@@ -76,20 +85,39 @@ func DELETE(function HandlerFunc) *Operation {
 }
 
 func HandleDELETE(handler Handler) *Operation {
-	return NewOperation(handler).Method(METHOD_DELETE)
+	return NewOperation(handler).Method(constants.METHOD_DELETE)
 }
 
+// Name sets the name of the operation.
+func (o *Operation) Name(name string) *Operation {
+	o.name = name
+	return o
+}
+
+// GetName returns the name of the operation.
+func (o *Operation) GetName() string {
+	return o.name
+}
+
+// GetName returns the description of the operation.
+func (o *Operation) GetDescription() string {
+	return o.description
+}
+
+// Description sets the description of the operation.
 func (o *Operation) Description(description string) *Operation {
 	o.description = description
 	return o
 }
 
-func (o *Operation) GetDescription() string {
-	return o.description
-}
-
 func (o *Operation) Method(method string) *Operation {
-	o.method = method
+	if method == constants.METHOD_ANY ||
+		method == constants.METHOD_GET ||
+		method == constants.METHOD_POST ||
+		method == constants.METHOD_PUT ||
+		method == constants.METHOD_DELETE {
+		o.method = method
+	}
 	return o
 }
 
