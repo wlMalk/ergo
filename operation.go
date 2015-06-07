@@ -21,6 +21,16 @@ func (om OperationMap) GetOperation(method string) (*Operation, bool) {
 	return o, ok
 }
 
+type Operationer interface {
+	GetSchemes() []string
+	GetConsumes() []string
+	GetProduces() []string
+	GetName() string
+	GetDescription() string
+	GetMethod() string
+	GetRoute() Router
+}
+
 // Operation
 
 type Operation struct {
