@@ -8,15 +8,6 @@ var (
 	MaxMemory int64 = 32 << 20 // 32 MB
 )
 
-type Handler interface {
-	ServeHTTP(*Response, *Request)
-}
-
-type HandlerFunc func(*Response, *Request)
-
-func (f HandlerFunc) ServeHTTP(w *Response, r *Request) {
-	f(w, r)
-}
 
 type OperationMap map[string]*Operation
 
