@@ -5,6 +5,9 @@ import (
 	"strings"
 )
 
+type ExternalRouter interface {
+}
+
 type Ergoer interface {
 	GetSchemes() []string
 	GetConsumes() []string
