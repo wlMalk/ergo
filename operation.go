@@ -10,6 +10,7 @@ var (
 	MaxMemory int64 = 32 << 20 // 32 MB
 )
 
+type OperationerMap map[string]Operationer
 
 type OperationMap map[string]*Operation
 
