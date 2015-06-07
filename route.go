@@ -9,19 +9,13 @@ import (
 // Route
 
 type Route struct {
-	parent          *Route
-	name            string
-	path            string
-	description     string
-	routes          map[string]*Route
-	indexSlice      []string
-	indexMap        map[string]int
-	params          map[string]*Param
-	schemes         []string
-	consumes        []string
-	produces        []string
-	operations      OperationMap
-	notFoundHandler Handler
+	ergo        *Ergo
+	parent      *Route
+	path        string
+	routes      map[string]*Route
+	routesSlice []string
+	params      map[string]*Param
+	operations  OperationMap
 }
 
 func NewRoute(path string) *Route {
@@ -29,7 +23,6 @@ func NewRoute(path string) *Route {
 		path:       strings.ToLower(preparePath(path)),
 		routes:     map[string]*Route{},
 		params:     map[string]*Param{},
-		indexMap:   map[string]int{},
 		operations: OperationMap{},
 	}
 }
@@ -37,29 +30,6 @@ func NewRoute(path string) *Route {
 // GetParent returns the parent of the route.
 func (r *Route) GetParent() *Route {
 	return r.parent
-}
-
-// Name sets the name of the route.
-// The route name is only used for documentation purposes.
-func (r *Route) Name(name string) *Route {
-	r.name = name
-	return r
-}
-
-// GetName returns the name of the route.
-func (r *Route) GetName() string {
-	return r.name
-}
-
-// GetName returns the description of the route.
-func (r *Route) GetDescription() string {
-	return r.description
-}
-
-// Description sets the description of the route.
-func (r *Route) Description(description string) *Route {
-	r.description = description
-	return r
 }
 
 // GetPath returns the relative path of the route to the
@@ -112,7 +82,7 @@ func (r *Route) GetRoutes() map[string]*Route {
 // based on the order in which it was added.
 func (r *Route) GetRoutesSlice() []*Route {
 	var routes []*Route
-	for _, s := range r.indexSlice {
+	for _, s := range r.routesSlice {
 		routes = append(routes, r.routes[s])
 	}
 	return routes
@@ -122,24 +92,6 @@ func (r *Route) GetRoutesSlice() []*Route {
 func (r *Route) SetRoutes(routes map[string]*Route) *Route {
 	r.routes = routes
 	return r
-}
-
-// GetSchemes returns the default schemes passed from
-// the parent.
-func (r *Route) GetSchemes() []string {
-	return r.schemes
-}
-
-// GetConsumes returns the consumable content types
-// passed from the parent.
-func (r *Route) GetConsumes() []string {
-	return r.consumes
-}
-
-// GetProduces returns the producible content types
-// passed from the parent.
-func (r *Route) GetProduces() []string {
-	return r.produces
 }
 
 // Params add the given params to the params map in the route.
@@ -188,8 +140,8 @@ func (r *Route) ANY(function HandlerFunc) *Operation {
 
 func (r *Route) HandleANY(handler Handler) *Operation {
 	operation := HandleANY(handler)
-	setChild(r, operation)
-	r.operations[METHOD_ANY] = operation
+	setOperation(r, operation)
+	r.operations[constants.METHOD_ANY] = operation
 	return operation
 }
 
@@ -199,8 +151,8 @@ func (r *Route) GET(function HandlerFunc) *Operation {
 
 func (r *Route) HandleGET(handler Handler) *Operation {
 	operation := HandleGET(handler)
-	setChild(r, operation)
-	r.operations[METHOD_GET] = operation
+	setOperation(r, operation)
+	r.operations[constants.METHOD_GET] = operation
 	return operation
 }
 
@@ -210,8 +162,8 @@ func (r *Route) POST(function HandlerFunc) *Operation {
 
 func (r *Route) HandlePOST(handler Handler) *Operation {
 	operation := HandlePOST(handler)
-	setChild(r, operation)
-	r.operations[METHOD_POST] = operation
+	setOperation(r, operation)
+	r.operations[constants.METHOD_POST] = operation
 	return operation
 }
 
@@ -221,8 +173,8 @@ func (r *Route) PUT(function HandlerFunc) *Operation {
 
 func (r *Route) HandlePUT(handler Handler) *Operation {
 	operation := HandlePUT(handler)
-	setChild(r, operation)
-	r.operations[METHOD_PUT] = operation
+	setOperation(r, operation)
+	r.operations[constants.METHOD_PUT] = operation
 	return operation
 }
 
@@ -232,8 +184,8 @@ func (r *Route) DELETE(function HandlerFunc) *Operation {
 
 func (r *Route) HandleDELETE(handler Handler) *Operation {
 	operation := HandleDELETE(handler)
-	setChild(r, operation)
-	r.operations[METHOD_DELETE] = operation
+	setOperation(r, operation)
+	r.operations[constants.METHOD_DELETE] = operation
 	return operation
 }
 
@@ -250,23 +202,17 @@ func (r *Route) GetOperations() OperationMap {
 	return r.operations
 }
 
-// NotFoundHandler sets the handler used when an operation is not found
-// in the route, when a subroute could not be found.
-func (r *Route) NotFoundHandler(h Handler) *Route {
-	r.notFoundHandler = h
-	return r
+func (r *Route) GetOperationers() OperationerMap {
+	ops := OperationerMap{}
+	for m, o := range r.operations {
+		ops[m] = o
+	}
+	return ops
 }
 
-// GetNotFoundHandler returns the handler set in the route.
-// If it is nil and t is true then it will try and look for handler in a parent.
-func (r *Route) GetNotFoundHandler(t bool) Handler {
-	if r.notFoundHandler == nil {
-		if t {
-			return r.parent.GetNotFoundHandler(t)
-		}
-		return nil
-	}
-	return r.notFoundHandler
+// returns Ergo object with only a set of methods exposed
+func (r *Route) Ergo() Ergoer {
+	return r.ergo
 }
 
 func (r *Route) Match(path string) (*Route, string) {
@@ -291,9 +237,10 @@ func (r *Route) ServeHTTP(res *Response, req *Request) {
 	// validate the params with all the matching routes
 	o, ok := r.operations.GetOperation(req.Method)
 	if !ok {
-		// method not allowed
+		r.ergo.MethodNotAllowed(r, res, req)
 		return
 	}
+	req.operation = o
 	o.ServeHTTP(res, req)
 }
 
@@ -301,16 +248,10 @@ func (r *Route) ServeHTTP(res *Response, req *Request) {
 // It does not copy parent, operations, nor deep-copy the params.
 func (r *Route) Copy() *Route {
 	route := NewRoute(r.path)
-	route.name = r.name
-	route.description = r.description
 	for _, cr := range r.routes {
 		route.AddRoute(cr)
 	}
 	route.params = r.params
-	route.schemes = r.schemes
-	route.consumes = r.consumes
-	route.produces = r.produces
-	route.notFoundHandler = r.notFoundHandler
 	return route
 }
 
@@ -319,23 +260,11 @@ func (r *Route) addRoute(route *Route) {
 	if ok {
 		panic(fmt.Sprintf("A route with the path \"%s\" already exists.", route.path))
 	}
+	route.ergo = r.ergo
 	route.parent = r
-	setChild(r, route)
-	r.indexSlice = append(r.indexSlice, route.path)
-	r.indexMap[route.path] = len(r.indexSlice) - 1
+	setParamer(r, route)
+	r.routesSlice = append(r.routesSlice, route.path)
 	r.routes[route.path] = route
-}
-
-func (r *Route) setSchemes(schemes []string) {
-	r.schemes = schemes
-}
-
-func (r *Route) setConsumes(consumes []string) {
-	r.consumes = consumes
-}
-
-func (r *Route) setProduces(produces []string) {
-	r.produces = produces
 }
 
 func (r *Route) setParams(params map[string]*Param) {
@@ -358,8 +287,8 @@ func (r *Route) match(path string) (bool, string, string) {
 }
 
 func (r *Route) subMatch(path string) (*Route, string) {
-	for _, route := range r.routes {
-		nr, par := route.Match(path)
+	for _, routepath := range r.routesSlice {
+		nr, par := r.routes[routepath].Match(path)
 		if nr != nil {
 			return nr, par
 		}
