@@ -103,6 +103,12 @@ func (p *Param) In(in ...int) *Param {
 	return p
 }
 
+// Must sets the validators to use.
+func (p *Param) Must(validators ...validation.Validator) *Param {
+	p.validators = validators
+	return p
+}
+
 // Validate returns the first error it encountered
 func (p *Param) Validate(pv validation.Valuer, req *Request) error {
 	for _, v := range p.validators {

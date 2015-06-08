@@ -147,7 +147,7 @@ func (o *Operation) GetRoute() Router {
 }
 
 func (o *Operation) Params(params ...*Param) *Operation {
-	addParams(o, params...)
+	addParams(o, params)
 	return o
 }
 
@@ -174,12 +174,12 @@ func (o *Operation) SetParams(params map[string]*Param) *Operation {
 }
 
 func (o *Operation) IgnoreParams(params ...string) *Operation {
-	ignoreParams(o, params...)
+	ignoreParams(o, params)
 	return o
 }
 
 func (o *Operation) IgnoreParamsBut(params ...string) *Operation {
-	ignoreParamsBut(o, params...)
+	ignoreParamsBut(o, params)
 	return o
 }
 
@@ -208,7 +208,7 @@ func (o *Operation) setParams(params map[string]*Param) {
 func (o *Operation) setParamsSlice(params ...*Param) {
 	paramsMap := map[string]*Param{}
 	for _, p := range params {
-		o.params[p.name] = p
+		paramsMap[p.name] = p
 	}
 	o.setParams(paramsMap)
 }
