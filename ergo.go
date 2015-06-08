@@ -2,10 +2,11 @@ package ergo
 
 import (
 	"net/http"
-	"strings"
 )
 
-type ExternalRouter interface {
+type Wrapper interface {
+	Match(*http.Request) http.Handler
+	Handle(string, string, Handler)
 }
 
 type Ergoer interface {
@@ -22,11 +23,13 @@ type Ergoer interface {
 
 type Ergo struct {
 	root   *Route
-	router ExternalRouter
+	router Wrapper
 
 	schemes  []string
 	consumes []string
 	produces []string
+
+	operations []*Operation
 
 	NotFoundHandler         Handler
 	MethodNotAllowedHandler MethodNotAllowedHandler
@@ -44,6 +47,12 @@ func New() *Ergo {
 	r := NewRoute("")
 	r.ergo = e
 	e.root = r
+	return e
+}
+
+func NewWith(w Wrapper) *Ergo {
+	e := New()
+	e.Router(w)
 	return e
 }
 
@@ -93,8 +102,8 @@ func (e *Ergo) IgnoreParamsBut(params ...string) *Ergo {
 
 // Router uses a router that implement Router interface
 // as the main router.
-func (e *Ergo) Router(er ExternalRouter) {
-
+func (e *Ergo) Router(w Wrapper) {
+	e.router = w
 }
 
 // GetSchemes returns the default schemes.
@@ -125,7 +134,15 @@ func (e *Ergo) setProduces(produces []string) {
 }
 
 func (e *Ergo) Prepare() error {
+	e.operations = e.root.GetAllOperations()
+	e.PrepareRouter()
 	return nil
+}
+
+func (e *Ergo) PrepareRouter() {
+	for _, o := range e.operations {
+		e.router.Handle(o.method, o.route.GetFullPath(), o)
+	}
 }
 
 func (e *Ergo) NotFound(res *Response, req *Request) {
@@ -162,26 +179,17 @@ func (e *Ergo) RunTLS(addr, certFile, keyFile string) error {
 
 func (e *Ergo) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	path := preparePath(r.URL.Path)
-	if r.URL.Path != "/"+path && r.Method == "GET" {
-		r.URL.Path = "/" + path
+	if r.URL.Path != path && r.Method == "GET" {
+		r.URL.Path = path
 		http.Redirect(w, r, r.URL.String(), http.StatusMovedPermanently)
 		return
 	}
-	route, rp := e.root.Match(path)
-	if route == nil {
+
+	handler := e.router.Match(r)
+	if handler == nil {
 		// not found
 		return
 	}
 
-	req := NewRequest(r)
-	if len(rp) > 0 {
-		ps := strings.Split(rp[:len(rp)], ";")
-		for _, p := range ps {
-			ci := strings.Index(p, ":")
-
-			req.pathParams[p[:ci]] = p[ci+1:]
-		}
-	}
-	res := NewResponse(w)
-	route.ServeHTTP(res, req)
+	handler.ServeHTTP(w, r)
 }

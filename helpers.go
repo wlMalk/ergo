@@ -8,7 +8,10 @@ import (
 
 func preparePath(path string) string {
 	path = strings.Trim(path, "/")
-	return path
+	if path == "" {
+		return "/"
+	}
+	return "/" + path
 }
 
 type paramer interface {
