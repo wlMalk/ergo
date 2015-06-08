@@ -25,7 +25,7 @@ type paramer interface {
 // params as long as they are different in names.
 // No two params can share the same name even if they are
 // in different places.
-func addParams(pa paramer, params ...*Param) {
+func addParams(pa paramer, params []*Param) {
 	ps := pa.GetParamsSlice()
 	for _, p := range params {
 		ps = append(ps, p)
@@ -33,7 +33,7 @@ func addParams(pa paramer, params ...*Param) {
 	pa.setParamsSlice(ps...)
 }
 
-func ignoreParams(pa paramer, params ...string) {
+func ignoreParams(pa paramer, params []string) {
 	ps := pa.GetParams()
 	for _, p := range params {
 		delete(ps, p)
@@ -41,7 +41,7 @@ func ignoreParams(pa paramer, params ...string) {
 	pa.setParams(ps)
 }
 
-func ignoreParamsBut(pa paramer, params ...string) {
+func ignoreParamsBut(pa paramer, params []string) {
 	nparams := map[string]*Param{}
 	ps := pa.GetParams()
 	for _, p := range params {
@@ -126,10 +126,6 @@ func produces(p producer, mimes []string) {
 	if len(mimes) > 0 {
 		p.setProduces(mimes)
 	}
-}
-
-func setParamer(r *Route, p paramer) {
-	p.setParams(r.GetParams())
 }
 
 func containsString(vals []string, a string) bool {

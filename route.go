@@ -95,7 +95,7 @@ func (r *Route) SetRoutes(routes []*Route) *Route {
 // No two params can have the same name, even if the were
 // in different places.
 func (r *Route) Params(params ...*Param) *Route {
-	addParams(r, params...)
+	addParams(r, params)
 	return r
 }
 
@@ -122,12 +122,12 @@ func (r *Route) SetParams(params map[string]*Param) *Route {
 }
 
 func (r *Route) IgnoreParams(params ...string) *Route {
-	ignoreParams(r, params...)
+	ignoreParams(r, params)
 	return r
 }
 
 func (r *Route) IgnoreParamsBut(params ...string) *Route {
-	ignoreParamsBut(r, params...)
+	ignoreParamsBut(r, params)
 	return r
 }
 
@@ -212,7 +212,7 @@ func (r *Route) addOperation(o *Operation) {
 	o.setSchemes(r.ergo.GetSchemes())
 	o.setConsumes(r.ergo.GetConsumes())
 	o.setProduces(r.ergo.GetProduces())
-	setParamer(r, o)
+	o.setParams(r.params)
 	r.operations = append(r.operations, o)
 
 }
@@ -220,7 +220,7 @@ func (r *Route) addOperation(o *Operation) {
 func (r *Route) addRoute(route *Route) {
 	route.ergo = r.ergo
 	route.parent = r
-	setParamer(r, route)
+	r.setParams(r.params)
 	r.routes = append(r.routes, route)
 }
 
@@ -234,7 +234,7 @@ func (r *Route) setParams(params map[string]*Param) {
 func (r *Route) setParamsSlice(params ...*Param) {
 	paramsMap := map[string]*Param{}
 	for _, p := range params {
-		r.params[p.name] = p
+		paramsMap[p.name] = p
 	}
 	r.setParams(paramsMap)
 }
