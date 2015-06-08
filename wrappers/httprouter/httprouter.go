@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/wlMalk/ergo"
+	"github.com/wlMalk/ergo/wrappers"
 
 	"github.com/julienschmidt/httprouter"
 )
@@ -16,8 +17,10 @@ func Wrap(router *httprouter.Router) *Wrapper {
 	return &Wrapper{router}
 }
 
-func (w *Wrapper) Handle(method string, path string, h ergo.Handler) {
-	w.router.Handle(method, path, getHandle(h))
+func (w *Wrapper) Set(ops []*ergo.Operation) {
+	for _, o := range ops {
+		w.router.Handle(o.GetMethod(), wrappers.CurlyToColon(o.GetRoute().GetFullPath()), getHandle(o))
+	}
 }
 
 func (w *Wrapper) Match(r *http.Request) http.Handler {
@@ -32,11 +35,9 @@ func getHandle(h ergo.Handler) httprouter.Handle {
 	return httprouter.Handle(func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		req := ergo.NewRequest(r)
 		res := ergo.NewResponse(w)
-		params := map[string]string{}
 		for _, p := range ps {
-			params[p.Key] = p.Value
+			req.PathParams[p.Key] = p.Value
 		}
-		req.SetPathParams(params)
 		h.ServeHTTP(res, req)
 	})
 }
