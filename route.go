@@ -187,40 +187,13 @@ func (r *Route) GetAllOperations() []*Operation {
 	return ops
 }
 
-// returns Ergo object with only a set of methods exposed
-func (r *Route) Ergo() Ergoer {
-	return r.ergo
 func (r *Route) GetOperations() []*Operation {
 	return r.operations
 }
 
-func (r *Route) Match(path string) (*Route, string) {
-	if r.parent != nil {
-		mat, rem, par := r.match(path)
-		if !mat {
-			return nil, ""
-		}
-		if rem == "" {
-			return r, par
-		}
-		return r.subMatch(rem)
-	}
-	return r.subMatch(path)
-}
-
-func (r *Route) MatchURL(u *url.URL) (*Route, string) {
-	return r.Match(u.Path[:len(u.Path)+1])
-}
-
-func (r *Route) ServeHTTP(res *Response, req *Request) {
-	// validate the params with all the matching routes
-	o, ok := r.operations.GetOperation(req.Method)
-	if !ok {
-		r.ergo.MethodNotAllowed(r, res, req)
-		return
-	}
-	req.operation = o
-	o.ServeHTTP(res, req)
+// returns Ergo object with only a set of methods exposed
+func (r *Route) Ergo() Ergoer {
+	return r.ergo
 }
 
 // Copy returns a pointer to a copy of the route.
@@ -265,19 +238,4 @@ func (r *Route) setParamsSlice(params ...*Param) {
 	}
 	r.setParams(paramsMap)
 }
-
-func (r *Route) match(path string) (bool, string, string) {
-	return match(r.path, path)
-}
-
-func (r *Route) subMatch(path string) (*Route, string) {
-	for _, routepath := range r.routesSlice {
-		nr, par := r.routes[routepath].Match(path)
-		if nr != nil {
-			return nr, par
-		}
-	}
-	return nil, ""
-}
-
 
