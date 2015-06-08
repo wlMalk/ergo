@@ -9,14 +9,14 @@ import (
 type Request struct {
 	*http.Request
 	Input      map[string]validation.Valuer
-	pathParams map[string]string
+	PathParams map[string]string
 	operation  *Operation // Operation object
 }
 
 func NewRequest(httpRequest *http.Request) *Request {
 	return &Request{
 		Request:    httpRequest,
-		pathParams: map[string]string{},
+		PathParams: map[string]string{},
 		Input:      map[string]validation.Valuer{},
 	}
 }
@@ -56,8 +56,4 @@ func (req *Request) Params(names ...string) map[string]validation.Valuer {
 
 func (req *Request) GetOperation() Operationer {
 	return req.operation
-}
-
-func (req *Request) SetPathParams(params map[string]string) {
-	req.pathParams = params
 }
