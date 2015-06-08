@@ -1,11 +1,7 @@
 package ergo
 
 import (
-	"fmt"
-	"net/url"
 	"strings"
-
-	"github.com/wlMalk/ergo/constants"
 )
 
 type Router interface {
@@ -14,21 +10,18 @@ type Router interface {
 // Route
 
 type Route struct {
-	ergo        *Ergo
-	parent      *Route
-	path        string
-	routes      map[string]*Route
-	routesSlice []string
-	params      map[string]*Param
-	operations  OperationMap
+	ergo       *Ergo
+	parent     *Route
+	path       string
+	routes     []*Route
+	params     map[string]*Param
+	operations []*Operation
 }
 
 func NewRoute(path string) *Route {
 	return &Route{
-		path:       strings.ToLower(preparePath(path)),
-		routes:     map[string]*Route{},
-		params:     map[string]*Param{},
-		operations: OperationMap{},
+		path:   strings.ToLower(preparePath(path)),
+		params: map[string]*Param{},
 	}
 }
 
@@ -78,23 +71,22 @@ func (r *Route) AddRoutes(routes ...*Route) *Route {
 	return r
 }
 
-// GetRoutes returns the map of child routes.
-func (r *Route) GetRoutes() map[string]*Route {
+// GetRoutes returns the slice of child routes.
+func (r *Route) GetRoutes() []*Route {
 	return r.routes
 }
 
-// GetRoutesSlice returns a slice of child routes
-// based on the order in which it was added.
-func (r *Route) GetRoutesSlice() []*Route {
+// GetRoutes returns the slice of all nested routes under r.
+func (r *Route) GetAllRoutes() []*Route {
 	var routes []*Route
-	for _, s := range r.routesSlice {
-		routes = append(routes, r.routes[s])
+	for _, route := range r.routes {
+		routes = append(routes, route.GetAllRoutes()...)
 	}
 	return routes
 }
 
-// SetRoutes replaces the routes map with the given one.
-func (r *Route) SetRoutes(routes map[string]*Route) *Route {
+// SetRoutes replaces the routes slice with the given one.
+func (r *Route) SetRoutes(routes []*Route) *Route {
 	r.routes = routes
 	return r
 }
