@@ -6,7 +6,7 @@ import (
 
 type Wrapper interface {
 	Match(*http.Request) http.Handler
-	Handle(string, string, Handler)
+	Set([]*Operation)
 }
 
 type Ergoer interface {
@@ -140,9 +140,8 @@ func (e *Ergo) Prepare() error {
 }
 
 func (e *Ergo) PrepareRouter() {
-	for _, o := range e.operations {
-		e.router.Handle(o.method, o.route.GetFullPath(), o)
-	}
+	e.router.Set(e.operations)
+
 }
 
 func (e *Ergo) NotFound(res *Response, req *Request) {
