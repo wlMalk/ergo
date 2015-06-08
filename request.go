@@ -15,8 +15,9 @@ type Request struct {
 
 func NewRequest(httpRequest *http.Request) *Request {
 	return &Request{
-		Request: httpRequest,
-		Input:   map[string]validation.Valuer{},
+		Request:    httpRequest,
+		pathParams: map[string]string{},
+		Input:      map[string]validation.Valuer{},
 	}
 }
 
@@ -55,4 +56,8 @@ func (req *Request) Params(names ...string) map[string]validation.Valuer {
 
 func (req *Request) GetOperation() Operationer {
 	return req.operation
+}
+
+func (req *Request) SetPathParams(params map[string]string) {
+	req.pathParams = params
 }
