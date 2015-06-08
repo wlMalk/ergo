@@ -128,13 +128,6 @@ func produces(p producer, mimes []string) {
 	}
 }
 
-func setOperation(r *Route, o *Operation) {
-	o.setSchemes(r.ergo.GetSchemes())
-	o.setConsumes(r.ergo.GetConsumes())
-	o.setProduces(r.ergo.GetProduces())
-	setParamer(r, o)
-}
-
 func setParamer(r *Route, p paramer) {
 	p.setParams(r.GetParams())
 }
