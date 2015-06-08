@@ -1,26 +1,12 @@
 package ergo
 
 import (
-	"strings"
-
 	"github.com/wlMalk/ergo/constants"
 )
 
 var (
 	MaxMemory int64 = 32 << 20 // 32 MB
 )
-
-type OperationerMap map[string]Operationer
-
-type OperationMap map[string]*Operation
-
-func (om OperationMap) GetOperation(method string) (*Operation, bool) {
-	o, ok := om[strings.ToUpper(method)]
-	if !ok {
-		o, ok = om[""]
-	}
-	return o, ok
-}
 
 type Operationer interface {
 	GetSchemes() []string
