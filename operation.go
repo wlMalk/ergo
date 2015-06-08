@@ -59,14 +59,6 @@ func NewOperation(handler Handler) *Operation {
 	}
 }
 
-func ANY(function HandlerFunc) *Operation {
-	return HandleANY(HandlerFunc(function))
-}
-
-func HandleANY(handler Handler) *Operation {
-	return NewOperation(handler).Method(constants.METHOD_ANY)
-}
-
 func GET(function HandlerFunc) *Operation {
 	return HandleGET(HandlerFunc(function))
 }
@@ -122,8 +114,7 @@ func (o *Operation) Description(description string) *Operation {
 }
 
 func (o *Operation) Method(method string) *Operation {
-	if method == constants.METHOD_ANY ||
-		method == constants.METHOD_GET ||
+	if method == constants.METHOD_GET ||
 		method == constants.METHOD_POST ||
 		method == constants.METHOD_PUT ||
 		method == constants.METHOD_DELETE {

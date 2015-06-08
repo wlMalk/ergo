@@ -139,17 +139,6 @@ func (r *Route) IgnoreParamsBut(params ...string) *Route {
 	return r
 }
 
-func (r *Route) ANY(function HandlerFunc) *Operation {
-	return r.HandleANY(HandlerFunc(function))
-}
-
-func (r *Route) HandleANY(handler Handler) *Operation {
-	operation := HandleANY(handler)
-	setOperation(r, operation)
-	r.operations[constants.METHOD_ANY] = operation
-	return operation
-}
-
 func (r *Route) GET(function HandlerFunc) *Operation {
 	return r.HandleGET(HandlerFunc(function))
 }
