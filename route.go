@@ -5,6 +5,8 @@ import (
 )
 
 type Router interface {
+	GetPath() string
+	GetFullPath() string
 }
 
 // Route
