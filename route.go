@@ -34,7 +34,7 @@ func (r *Route) GetParent() *Route {
 // parent route.
 func (r *Route) GetPath() string {
 	if r.parent != nil {
-		return "/" + r.path
+		return r.path
 	}
 	return ""
 }
@@ -137,8 +137,7 @@ func (r *Route) GET(function HandlerFunc) *Operation {
 
 func (r *Route) HandleGET(handler Handler) *Operation {
 	operation := HandleGET(handler)
-	setOperation(r, operation)
-	r.operations[constants.METHOD_GET] = operation
+	r.addOperation(operation)
 	return operation
 }
 
@@ -148,8 +147,7 @@ func (r *Route) POST(function HandlerFunc) *Operation {
 
 func (r *Route) HandlePOST(handler Handler) *Operation {
 	operation := HandlePOST(handler)
-	setOperation(r, operation)
-	r.operations[constants.METHOD_POST] = operation
+	r.addOperation(operation)
 	return operation
 }
 
@@ -159,8 +157,7 @@ func (r *Route) PUT(function HandlerFunc) *Operation {
 
 func (r *Route) HandlePUT(handler Handler) *Operation {
 	operation := HandlePUT(handler)
-	setOperation(r, operation)
-	r.operations[constants.METHOD_PUT] = operation
+	r.addOperation(operation)
 	return operation
 }
 
@@ -170,28 +167,22 @@ func (r *Route) DELETE(function HandlerFunc) *Operation {
 
 func (r *Route) HandleDELETE(handler Handler) *Operation {
 	operation := HandleDELETE(handler)
-	setOperation(r, operation)
-	r.operations[constants.METHOD_DELETE] = operation
+	r.addOperation(operation)
 	return operation
 }
 
 // Operations does not alter the given operations in any way,
 // it does not even add route parameters.
 func (r *Route) Operations(operations ...*Operation) *Route {
-	for _, o := range operations {
-		r.operations[o.method] = o
-	}
+	r.operations = operations
 	return r
 }
 
-func (r *Route) GetOperations() OperationMap {
-	return r.operations
-}
-
-func (r *Route) GetOperationers() OperationerMap {
-	ops := OperationerMap{}
-	for m, o := range r.operations {
-		ops[m] = o
+func (r *Route) GetAllOperations() []*Operation {
+	var ops []*Operation
+	ops = append(ops, r.operations...)
+	for _, route := range r.routes {
+		ops = append(ops, route.GetAllOperations()...)
 	}
 	return ops
 }
@@ -199,6 +190,8 @@ func (r *Route) GetOperationers() OperationerMap {
 // returns Ergo object with only a set of methods exposed
 func (r *Route) Ergo() Ergoer {
 	return r.ergo
+func (r *Route) GetOperations() []*Operation {
+	return r.operations
 }
 
 func (r *Route) Match(path string) (*Route, string) {
@@ -241,16 +234,21 @@ func (r *Route) Copy() *Route {
 	return route
 }
 
+func (r *Route) addOperation(o *Operation) {
+	o.route = r
+	o.setSchemes(r.ergo.GetSchemes())
+	o.setConsumes(r.ergo.GetConsumes())
+	o.setProduces(r.ergo.GetProduces())
+	setParamer(r, o)
+	r.operations = append(r.operations, o)
+
+}
+
 func (r *Route) addRoute(route *Route) {
-	_, ok := r.routes[route.path]
-	if ok {
-		panic(fmt.Sprintf("A route with the path \"%s\" already exists.", route.path))
-	}
 	route.ergo = r.ergo
 	route.parent = r
 	setParamer(r, route)
-	r.routesSlice = append(r.routesSlice, route.path)
-	r.routes[route.path] = route
+	r.routes = append(r.routes, route)
 }
 
 func (r *Route) setParams(params map[string]*Param) {
