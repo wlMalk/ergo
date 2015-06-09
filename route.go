@@ -230,6 +230,9 @@ func (r *Route) Copy() *Route {
 	return route
 }
 
+func (r *Route) ServeHTTP(ctx *Context) {
+}
+
 func (r *Route) addOperation(o *Operation) {
 	o.route = r
 	o.Params(r.GetParamsSlice()...)

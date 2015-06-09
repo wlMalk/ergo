@@ -17,9 +17,9 @@ func Wrap(router *httprouter.Router) *Wrapper {
 	return &Wrapper{router}
 }
 
-func (w *Wrapper) Set(ops []*ergo.Operation) {
-	for _, o := range ops {
-		w.router.Handle(o.GetMethod(), wrappers.CurlyToColon(o.GetRoute().GetFullPath()), getHandle(o))
+func (w *Wrapper) Set(routes []*ergo.Route) {
+	for _, r := range routes {
+		w.router.Handle("GET", wrappers.CurlyToColon(r.GetFullPath()), getHandle(r))
 	}
 }
 

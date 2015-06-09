@@ -8,7 +8,7 @@ import (
 
 type Wrapper interface {
 	Match(*http.Request) http.Handler
-	Set([]*Operation)
+	Set([]*Route)
 }
 
 var (
