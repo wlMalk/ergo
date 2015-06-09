@@ -1,30 +1,35 @@
 package ergo
 
 var (
-	defaultNotFoundHandler         Handler
-	defaultMethodNotAllowedHandler MethodNotAllowedHandler
-	defaultErrHandler              ErrHandler
-	defaultPanicHandler            Handler
+	DefNotFoundHandler      Handler
+	DefMethodNotAllowedFunc MethodNotAllowedFunc = MethodNotAllowedFunc(methodNotAllowedFunc)
+	DefErrHandler           ErrHandler
+	DefPanicHandler         Handler
 )
 
 type Handler interface {
-	ServeHTTP(*Response, *Request)
+	ServeHTTP(*Context)
 }
 
-type HandlerFunc func(*Response, *Request)
+type HandlerFunc func(*Context)
 
-func (f HandlerFunc) ServeHTTP(res *Response, req *Request) {
-	f(res, req)
+func (f HandlerFunc) ServeHTTP(ctx *Context) {
+	f(ctx)
 }
 
-type MethodNotAllowedHandler interface {
-	ServeHTTP(*Route, *Response, *Request)
+type NoCtxHandlerFunc func(*Response, *Request)
+
+func (f NoCtxHandlerFunc) ServeHTTP(ctx *Context) {
+	f(ctx.Response, ctx.Request)
 }
 
-type MethodNotAllowedHandlerFunc func(*Route, *Response, *Request)
+type MiddlewareFunc func(Handler) Handler
 
-func (f MethodNotAllowedHandlerFunc) ServeHTTP(r *Route, res *Response, req *Request) {
-	f(r, res, req)
+type MethodNotAllowedFunc func(Router) Handler
+
+func methodNotAllowedFunc(r Router) Handler {
+	return HandlerFunc(func(ctx *Context) {
+	})
 }
 
 type ErrHandler interface {
