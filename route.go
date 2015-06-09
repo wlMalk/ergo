@@ -231,6 +231,14 @@ func (r *Route) Copy() *Route {
 }
 
 func (r *Route) ServeHTTP(ctx *Context) {
+	for _, o := range r.operations {
+		if o.method == ctx.Request.Method {
+			o.ServeHTTP(ctx)
+			return
+		}
+	}
+	// method not allowed
+	return
 }
 
 func (r *Route) addOperation(o *Operation) {

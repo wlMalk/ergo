@@ -141,45 +141,13 @@ func (e *Ergo) Prepare() error {
 func (e *Ergo) PrepareRouter() {
 	for _, r := range e.root.GetAllRoutes() {
 		ops := r.GetOperations()
-		var ge, po, pu, de bool
 		for _, o := range ops {
 			o.Handler = getHandler(o.Handler, append(o.middleware, MiddlewareFunc(o.Validate)))
 			o.ergo = e
-			switch o.method {
-			case constants.METHOD_GET:
-				ge = true
-			case constants.METHOD_POST:
-				po = true
-			case constants.METHOD_PUT:
-				pu = true
-			case constants.METHOD_DELETE:
-				de = true
-			}
-		}
-		mnf := e.MethodNotAllowedFunc(r)
-		if !ge {
-			o := HandleGET(mnf)
-			o.route = r
-			ops = append(ops, o)
-		}
-		if !po {
-			o := HandlePOST(mnf)
-			o.route = r
-			ops = append(ops, o)
-		}
-		if !pu {
-			o := HandlePUT(mnf)
-			o.route = r
-			ops = append(ops, o)
-		}
-		if !de {
-			o := HandleDELETE(mnf)
-			o.route = r
-			ops = append(ops, o)
 		}
 		e.operations = append(e.operations, ops...)
 	}
-	e.router.Set(e.operations)
+	e.router.Set(e.root.GetAllRoutes())
 }
 
 func (e *Ergo) NotFound(ctx *Context) {
