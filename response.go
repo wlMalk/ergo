@@ -6,7 +6,7 @@ import (
 
 type Response struct {
 	http.ResponseWriter
-	statusCode    int
+	StatusCode    int
 	contentLength int
 	indent        bool
 }
@@ -14,6 +14,6 @@ type Response struct {
 func NewResponse(httpResponse http.ResponseWriter) *Response {
 	return &Response{
 		ResponseWriter: httpResponse,
-		statusCode:     http.StatusOK,
+		StatusCode:     http.StatusOK,
 	}
 }
