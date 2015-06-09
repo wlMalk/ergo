@@ -10,7 +10,6 @@ type Request struct {
 	*http.Request
 	Input      map[string]validation.Valuer
 	PathParams map[string]string
-	operation  *Operation // Operation object
 }
 
 func NewRequest(httpRequest *http.Request) *Request {
@@ -52,8 +51,4 @@ func (req *Request) Params(names ...string) map[string]validation.Valuer {
 		params[n] = p
 	}
 	return params
-}
-
-func (req *Request) GetOperation() Operationer {
-	return req.operation
 }
