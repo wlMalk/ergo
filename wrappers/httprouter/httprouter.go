@@ -38,7 +38,7 @@ func getHandle(h ergo.Handler) httprouter.Handle {
 		for _, p := range ps {
 			req.PathParams[p.Key] = p.Value
 		}
-		h.ServeHTTP(res, req)
+		h.ServeHTTP(ergo.NewContext(res, req))
 	})
 }
 
