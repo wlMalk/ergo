@@ -81,6 +81,7 @@ func (r *Route) GetRoutes() []*Route {
 func (r *Route) GetAllRoutes() []*Route {
 	var routes []*Route
 	for _, route := range r.routes {
+		routes = append(routes, route)
 		routes = append(routes, route.GetAllRoutes()...)
 	}
 	return routes
@@ -181,8 +182,8 @@ func (r *Route) Operations(operations ...*Operation) *Route {
 
 func (r *Route) GetAllOperations() []*Operation {
 	var ops []*Operation
-	ops = append(ops, r.operations...)
 	for _, route := range r.routes {
+		ops = append(ops, route.operations...)
 		ops = append(ops, route.GetAllOperations()...)
 	}
 	return ops
