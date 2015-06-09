@@ -128,6 +128,14 @@ func produces(p producer, mimes []string) {
 	}
 }
 
+func getHandler(h Handler, handlers []MiddlewareFunc) Handler {
+	final := h
+	for i := len(handlers) - 1; i >= 0; i-- {
+		final = handlers[i](final)
+	}
+	return final
+}
+
 func containsString(vals []string, a string) bool {
 	for _, v := range vals {
 		if a == v {
