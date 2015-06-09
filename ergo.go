@@ -95,26 +95,6 @@ func (e *Ergo) Params(params ...*Param) *Ergo {
 	return e
 }
 
-func (e *Ergo) ResetParams(params ...*Param) *Ergo {
-	e.root.setParamsSlice(params...)
-	return e
-}
-
-func (e *Ergo) SetParams(params map[string]*Param) *Ergo {
-	e.root.setParams(params)
-	return e
-}
-
-func (e *Ergo) IgnoreParams(params ...string) *Ergo {
-	ignoreParams(e.root, params)
-	return e
-}
-
-func (e *Ergo) IgnoreParamsBut(params ...string) *Ergo {
-	ignoreParamsBut(e.root, params)
-	return e
-}
-
 // Router uses a router that implement Router interface
 // as the main router.
 func (e *Ergo) Router(w Wrapper) {
