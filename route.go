@@ -131,7 +131,7 @@ func (r *Route) GetParamsSlice() []*Param {
 	return params
 }
 
-func (r *Route) ResetParams(params ...*Param) *Route {
+func (r *Route) SetParamsSlice(params ...*Param) *Route {
 	r.setParamsSlice(params...)
 	return r
 }
@@ -219,19 +219,22 @@ func (r *Route) Copy() *Route {
 		route.AddRoute(cr)
 	}
 	route.params = r.params
+	route.middleware = r.middleware
 	return route
 }
 
 func (r *Route) addOperation(o *Operation) {
 	o.route = r
-	o.setParams(r.params)
+	o.Params(r.GetParamsSlice()...)
 	r.operations = append(r.operations, o)
+	o.Use(r.middleware...)
 }
 
 func (r *Route) addRoute(route *Route) {
 	route.parent = r
-	r.setParams(r.params)
+	route.Params(r.GetParamsSlice()...)
 	r.routes = append(r.routes, route)
+	route.Use(r.middleware...)
 }
 
 func (r *Route) setParams(params map[string]*Param) {

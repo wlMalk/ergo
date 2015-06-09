@@ -181,7 +181,7 @@ func (o *Operation) GetParamsSlice() []*Param {
 	return params
 }
 
-func (o *Operation) ResetParams(params ...*Param) *Operation {
+func (o *Operation) SetParamsSlice(params ...*Param) *Operation {
 	o.setParamsSlice(params...)
 	return o
 }
@@ -203,6 +203,13 @@ func (o *Operation) IgnoreParamsBut(params ...string) *Operation {
 
 func (o *Operation) Validate(handler Handler) Handler {
 	return HandlerFunc(func(ctx *Context) {
+
+		// check for all things
+
+		if ctx.Request.Method != o.method {
+			return
+		}
+
 		var schemeAccepted bool
 		if ctx.Request.URL.Scheme == "" {
 			ctx.Request.URL.Scheme = constants.SCHEME_HTTP
@@ -215,7 +222,7 @@ func (o *Operation) Validate(handler Handler) Handler {
 		if !schemeAccepted {
 			return
 		}
-		// check for all things
+
 		ctx.Ergo = o.ergo
 		ctx.Operation = o
 		q := ctx.Request.URL.Query()
