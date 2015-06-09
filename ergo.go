@@ -2,6 +2,8 @@ package ergo
 
 import (
 	"net/http"
+
+	"github.com/wlMalk/ergo/constants"
 )
 
 type Wrapper interface {
@@ -9,14 +11,20 @@ type Wrapper interface {
 	Set([]*Operation)
 }
 
+var (
+	DefSchemes  = []string{constants.SCHEME_HTTP}
+	DefConsumes = []string{constants.MIME_JSON}
+	DefProduces = []string{constants.MIME_JSON}
+)
+
 type Ergoer interface {
 	GetSchemes() []string
 	GetConsumes() []string
 	GetProduces() []string
-	NotFound(*Response, *Request)
-	MethodNotAllowed(*Route, *Response, *Request)
+	NotFound(*Context)
+	MethodNotAllowed(*Route, *Context)
 	Err(error, *Response, *Request)
-	Panic(*Response, *Request)
+	Panic(*Context)
 }
 
 // Ergo
@@ -31,21 +39,23 @@ type Ergo struct {
 
 	operations []*Operation
 
-	NotFoundHandler         Handler
-	MethodNotAllowedHandler MethodNotAllowedHandler
-	ErrHandler              ErrHandler
-	PanicHandler            Handler
+	NotFoundHandler      Handler
+	MethodNotAllowedFunc MethodNotAllowedFunc
+	ErrHandler           ErrHandler
+	PanicHandler         Handler
 }
 
 func New() *Ergo {
 	e := &Ergo{
-		NotFoundHandler:         defaultNotFoundHandler,
-		MethodNotAllowedHandler: defaultMethodNotAllowedHandler,
-		ErrHandler:              defaultErrHandler,
-		PanicHandler:            defaultPanicHandler,
+		root:                 NewRoute(""),
+		schemes:              DefSchemes,
+		consumes:             DefConsumes,
+		produces:             DefProduces,
+		NotFoundHandler:      DefNotFoundHandler,
+		MethodNotAllowedFunc: DefMethodNotAllowedFunc,
+		ErrHandler:           DefErrHandler,
+		PanicHandler:         DefPanicHandler,
 	}
-	r := NewRoute("")
-	e.root = r
 	return e
 }
 
@@ -133,30 +143,28 @@ func (e *Ergo) setProduces(produces []string) {
 }
 
 func (e *Ergo) Prepare() error {
-	e.operations = e.root.GetAllOperations()
 	e.PrepareRouter()
 	return nil
 }
 
 func (e *Ergo) PrepareRouter() {
 	e.router.Set(e.operations)
-
 }
 
-func (e *Ergo) NotFound(res *Response, req *Request) {
-	e.NotFoundHandler.ServeHTTP(res, req)
+func (e *Ergo) NotFound(ctx *Context) {
+	e.NotFoundHandler.ServeHTTP(ctx)
 }
 
-func (e *Ergo) MethodNotAllowed(r *Route, res *Response, req *Request) {
-	e.MethodNotAllowedHandler.ServeHTTP(r, res, req)
+func (e *Ergo) MethodNotAllowed(r *Route, ctx *Context) {
+	e.MethodNotAllowedFunc(r).ServeHTTP(ctx)
 }
 
 func (e *Ergo) Err(err error, res *Response, req *Request) {
 	e.ErrHandler.ServeHTTP(err, res, req)
 }
 
-func (e *Ergo) Panic(res *Response, req *Request) {
-	e.PanicHandler.ServeHTTP(res, req)
+func (e *Ergo) Panic(ctx *Context) {
+	e.PanicHandler.ServeHTTP(ctx)
 }
 
 func (e *Ergo) Run(address string) error {
