@@ -45,7 +45,6 @@ func New() *Ergo {
 		PanicHandler:            defaultPanicHandler,
 	}
 	r := NewRoute("")
-	r.ergo = e
 	e.root = r
 	return e
 }

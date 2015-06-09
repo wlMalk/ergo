@@ -12,7 +12,6 @@ type Router interface {
 // Route
 
 type Route struct {
-	ergo       *Ergo
 	parent     *Route
 	path       string
 	routes     []*Route
@@ -193,11 +192,6 @@ func (r *Route) GetOperations() []*Operation {
 	return r.operations
 }
 
-// returns Ergo object with only a set of methods exposed
-func (r *Route) Ergo() Ergoer {
-	return r.ergo
-}
-
 // Copy returns a pointer to a copy of the route.
 // It does not copy parent, operations, nor deep-copy the params.
 func (r *Route) Copy() *Route {
@@ -211,16 +205,11 @@ func (r *Route) Copy() *Route {
 
 func (r *Route) addOperation(o *Operation) {
 	o.route = r
-	o.setSchemes(r.ergo.GetSchemes())
-	o.setConsumes(r.ergo.GetConsumes())
-	o.setProduces(r.ergo.GetProduces())
 	o.setParams(r.params)
 	r.operations = append(r.operations, o)
-
 }
 
 func (r *Route) addRoute(route *Route) {
-	route.ergo = r.ergo
 	route.parent = r
 	r.setParams(r.params)
 	r.routes = append(r.routes, route)
