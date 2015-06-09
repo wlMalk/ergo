@@ -131,6 +131,23 @@ func (o *Operation) Produces(mimes ...string) *Operation {
 	return o
 }
 
+// Use allows adding middleware for o
+// Use is additive
+func (o *Operation) Use(middleware ...MiddlewareFunc) *Operation {
+	o.middleware = append(o.middleware, middleware...)
+	return o
+}
+
+func (o *Operation) GetMiddleware() []MiddlewareFunc {
+	return o.middleware
+}
+
+// SetMiddleware will reset middleware with the given middleware
+func (o *Operation) SetMiddleware(middleware ...MiddlewareFunc) *Operation {
+	o.middleware = middleware
+	return o
+}
+
 func (o *Operation) GetSchemes() []string {
 	return o.schemes
 }

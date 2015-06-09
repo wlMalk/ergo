@@ -17,6 +17,7 @@ type Route struct {
 	routes     []*Route
 	params     map[string]*Param
 	operations []*Operation
+	middleware []MiddlewareFunc
 }
 
 func NewRoute(path string) *Route {
@@ -54,6 +55,23 @@ func (r *Route) New(path string) *Route {
 	route := NewRoute(path)
 	r.addRoute(route)
 	return route
+}
+
+// Use allows adding middleware for any operation in r
+// Use is additive
+func (r *Route) Use(middleware ...MiddlewareFunc) *Route {
+	r.middleware = append(r.middleware, middleware...)
+	return r
+}
+
+func (r *Route) GetMiddleware() []MiddlewareFunc {
+	return r.middleware
+}
+
+// SetMiddleware will reset middleware with the given middleware
+func (r *Route) SetMiddleware(middleware ...MiddlewareFunc) *Route {
+	r.middleware = middleware
+	return r
 }
 
 // AddRoute copies and add the given route then returns

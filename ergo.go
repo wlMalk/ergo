@@ -69,6 +69,12 @@ func (e *Ergo) New(path string) *Route {
 	return e.root.New(path)
 }
 
+// Use allows setting middleware for every operation in Ergo
+func (e *Ergo) Use(middleware ...MiddlewareFunc) *Ergo {
+	e.root.Use(middleware...)
+	return e
+}
+
 func (e *Ergo) Schemes(s ...string) *Ergo {
 	schemes(e, s)
 	return e
