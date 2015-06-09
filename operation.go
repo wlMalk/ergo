@@ -21,12 +21,13 @@ type Operationer interface {
 // Operation
 
 type Operation struct {
-	root          *Ergo
+	Handler
+	ergo          *Ergo
 	route         *Route
 	method        string
 	name          string
 	description   string
-	handler       Handler
+	middleware    []MiddlewareFunc
 	params        map[string]*Param
 	schemes       []string
 	consumes      []string
@@ -40,7 +41,7 @@ func NewOperation(handler Handler) *Operation {
 		panic("Handler cannot be nil")
 	}
 	return &Operation{
-		handler: handler,
+		Handler: handler,
 		params:  map[string]*Param{},
 	}
 }
@@ -183,7 +184,112 @@ func (o *Operation) IgnoreParamsBut(params ...string) *Operation {
 	return o
 }
 
-func (o *Operation) ServeHTTP(res *Response, req *Request) {
+func (o *Operation) Validate(handler Handler) Handler {
+	return HandlerFunc(func(ctx *Context) {
+		var schemeAccepted bool
+		if ctx.Request.URL.Scheme == "" {
+			ctx.Request.URL.Scheme = constants.SCHEME_HTTP
+		}
+		if o.schemes != nil {
+			schemeAccepted = containsString(o.schemes, ctx.Request.URL.Scheme)
+		} else {
+			schemeAccepted = containsString(o.ergo.schemes, ctx.Request.URL.Scheme)
+		}
+		if !schemeAccepted {
+			return
+		}
+		// check for all things
+		ctx.Ergo = o.ergo
+		ctx.Operation = o
+		q := ctx.Request.URL.Query()
+		h := ctx.Request.Header
+
+		if o.containsFiles {
+			ctx.Request.ParseMultipartForm(MaxMemory)
+		} else if o.bodyParams {
+			ctx.Request.ParseForm()
+		}
+		for _, p := range o.params {
+			var pv *ParamValue
+			if p.inPath {
+				v, ok := ctx.Request.PathParams[p.name]
+				if !ok {
+					return
+				}
+				pv = NewParamValue(p.name, v, "path")
+			} else if p.inQuery {
+				v, ok := q[p.name]
+				if !ok {
+					if p.required {
+						return
+					}
+				} else {
+					if !p.multiple {
+						pv = NewParamValue(p.name, v[0], "query")
+					} else {
+						pv = NewMultipleParamValue(p.name, v, "query")
+					}
+				}
+			} else if p.inHeader {
+				v, ok := h[p.name]
+				if !ok {
+					if p.required {
+						return
+					}
+				} else {
+					if !p.multiple {
+						pv = NewParamValue(p.name, v[0], "header")
+					} else {
+						pv = NewMultipleParamValue(p.name, v, "header")
+					}
+				}
+			} else if p.inBody { // decide what to do when content type is form-encoded
+				if p.file {
+					_, ok := ctx.Request.MultipartForm.File[p.name]
+					if !ok {
+						if p.required {
+							return
+						}
+					} else {
+						//pv = NewFileParamValue(p.name, v[0], "header")
+					}
+				} else if !p.file && o.containsFiles {
+					_, ok := ctx.Request.MultipartForm.Value[p.name]
+					if !ok {
+						if p.required {
+							return
+						}
+					} else {
+						//pv = NewFileParamValue(p.name, v[0], "header")
+					}
+				} else {
+					v, ok := ctx.Request.Form[p.name]
+					if !ok {
+						if p.required {
+							return
+						}
+					} else {
+						if !p.multiple {
+							pv = NewParamValue(p.name, v[0], "body")
+						} else {
+							pv = NewMultipleParamValue(p.name, v, "body")
+						}
+					}
+				}
+			}
+			ctx.Request.Input[p.name] = pv
+		}
+		for _, p := range o.params {
+			pv := ctx.Request.Input[p.name]
+			if pv != nil {
+				errs := p.Validate(pv, ctx.Request)
+				if errs != nil {
+					return
+				}
+			}
+		}
+		handler.ServeHTTP(ctx)
+	})
 }
 
 func (o *Operation) setSchemes(schemes []string) {
