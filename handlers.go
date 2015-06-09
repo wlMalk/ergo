@@ -23,7 +23,15 @@ func (f NoCtxHandlerFunc) ServeHTTP(ctx *Context) {
 	f(ctx.Response, ctx.Request)
 }
 
+type Middleware interface {
+	Run(Handler) Handler
+}
+
 type MiddlewareFunc func(Handler) Handler
+
+func (f MiddlewareFunc) Run(h Handler) Handler {
+	return f(h)
+}
 
 type MethodNotAllowedFunc func(Router) Handler
 

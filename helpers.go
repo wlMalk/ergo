@@ -128,10 +128,10 @@ func produces(p producer, mimes []string) {
 	}
 }
 
-func getHandler(h Handler, handlers []MiddlewareFunc) Handler {
+func getHandler(h Handler, handlers []Middleware) Handler {
 	final := h
 	for i := len(handlers) - 1; i >= 0; i-- {
-		final = handlers[i](final)
+		final = handlers[i].Run(final)
 	}
 	return final
 }

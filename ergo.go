@@ -70,8 +70,13 @@ func (e *Ergo) New(path string) *Route {
 }
 
 // Use allows setting middleware for every operation in Ergo
-func (e *Ergo) Use(middleware ...MiddlewareFunc) *Ergo {
+func (e *Ergo) Use(middleware ...Middleware) *Ergo {
 	e.root.Use(middleware...)
+	return e
+}
+
+func (e *Ergo) UseFunc(middleware ...MiddlewareFunc) *Ergo {
+	e.root.UseFunc(middleware...)
 	return e
 }
 
@@ -138,7 +143,7 @@ func (e *Ergo) PrepareRouter() {
 		ops := r.GetOperations()
 		var ge, po, pu, de bool
 		for _, o := range ops {
-			o.Handler = getHandler(o.Handler, append(o.middleware, o.Validate))
+			o.Handler = getHandler(o.Handler, append(o.middleware, MiddlewareFunc(o.Validate)))
 			o.ergo = e
 			switch o.method {
 			case constants.METHOD_GET:

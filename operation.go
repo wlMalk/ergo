@@ -27,7 +27,7 @@ type Operation struct {
 	method        string
 	name          string
 	description   string
-	middleware    []MiddlewareFunc
+	middleware    []Middleware
 	params        map[string]*Param
 	schemes       []string
 	consumes      []string
@@ -133,17 +133,24 @@ func (o *Operation) Produces(mimes ...string) *Operation {
 
 // Use allows adding middleware for o
 // Use is additive
-func (o *Operation) Use(middleware ...MiddlewareFunc) *Operation {
+func (o *Operation) Use(middleware ...Middleware) *Operation {
 	o.middleware = append(o.middleware, middleware...)
 	return o
 }
 
-func (o *Operation) GetMiddleware() []MiddlewareFunc {
+func (o *Operation) UseFunc(middleware ...MiddlewareFunc) *Operation {
+	for _, m := range middleware {
+		o.Use(Middleware(m))
+	}
+	return o
+}
+
+func (o *Operation) GetMiddleware() []Middleware {
 	return o.middleware
 }
 
 // SetMiddleware will reset middleware with the given middleware
-func (o *Operation) SetMiddleware(middleware ...MiddlewareFunc) *Operation {
+func (o *Operation) SetMiddleware(middleware ...Middleware) *Operation {
 	o.middleware = middleware
 	return o
 }
