@@ -10,9 +10,10 @@ var (
 )
 
 type Operationer interface {
-	GetSchemes() []string
-	GetConsumes() []string
-	GetProduces() []string
+	paramer
+	schemer
+	consumer
+	producer
 	GetName() string
 	GetDescription() string
 	GetMethod() string

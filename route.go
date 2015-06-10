@@ -7,6 +7,7 @@ import (
 )
 
 type Router interface {
+	paramer
 	GetPath() string
 	GetFullPath() string
 }

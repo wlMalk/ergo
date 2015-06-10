@@ -19,9 +19,9 @@ var (
 )
 
 type Ergoer interface {
-	GetSchemes() []string
-	GetConsumes() []string
-	GetProduces() []string
+	schemer
+	consumer
+	producer
 	NotFound(*Context)
 	MethodNotAllowed(*Route, *Context)
 	Err(error, *Response, *Request)
