@@ -4,10 +4,16 @@ import (
 	"fmt"
 )
 
-type ErrFmt string
+type Err string
 
-func (err ErrFmt) Fmt(vals ...interface{}) error {
+func (err Err) Err(vals ...interface{}) error {
 	return ValidationErr(fmt.Sprintf(string(err), vals...))
+}
+
+type Msg string
+
+func (m Msg) Msg(vals ...interface{}) string {
+	return fmt.Sprintf(string(m), vals...)
 }
 
 type ValidationErr string
@@ -17,6 +23,11 @@ func (err ValidationErr) Error() string {
 }
 
 const (
-	ErrEq     = ErrFmt("Validation Error: %v should equal %v")
-	ErrRegexp = ErrFmt("Validation Error: %v should match %v")
+	ErrEq     = Err("%v must equal %v") // prefix "Validation Error: " will be added
+	ErrRegexp = Err("%v must match %v")
+)
+
+const (
+	MsgEq     = Msg("must equal %v") // prefix "Validation Error: " will be added
+	MsgRegexp = Msg("must match %v")
 )
