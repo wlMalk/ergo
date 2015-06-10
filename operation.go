@@ -267,7 +267,7 @@ func (o *Operation) Validate(handler Handler) Handler {
 				if !ok {
 					return
 				}
-				pv = validation.NewValue(p.GetName(), v, "path")
+				pv = validation.NewValue(p.GetName(), v, "path", p.GetAs())
 			} else if p.IsInQuery {
 				v, ok := q[p.GetName()]
 				if !ok {
@@ -276,9 +276,9 @@ func (o *Operation) Validate(handler Handler) Handler {
 					}
 				} else {
 					if !p.IsMultiple {
-						pv = validation.NewValue(p.GetName(), v[0], "query")
+						pv = validation.NewValue(p.GetName(), v[0], "query", p.GetAs())
 					} else {
-						pv = validation.NewMultipleValue(p.GetName(), v, "query")
+						pv = validation.NewMultipleValue(p.GetName(), v, "query", p.GetAs())
 					}
 				}
 			} else if p.IsInHeader {
@@ -289,9 +289,9 @@ func (o *Operation) Validate(handler Handler) Handler {
 					}
 				} else {
 					if !p.IsMultiple {
-						pv = validation.NewValue(p.GetName(), v[0], "header")
+						pv = validation.NewValue(p.GetName(), v[0], "header", p.GetAs())
 					} else {
-						pv = validation.NewMultipleValue(p.GetName(), v, "header")
+						pv = validation.NewMultipleValue(p.GetName(), v, "header", p.GetAs())
 					}
 				}
 			} else if p.IsInBody { // decide what to do when content type is form-encoded
@@ -321,20 +321,22 @@ func (o *Operation) Validate(handler Handler) Handler {
 						}
 					} else {
 						if !p.IsMultiple {
-							pv = validation.NewValue(p.GetName(), v[0], "body")
+							pv = validation.NewValue(p.GetName(), v[0], "body", p.GetAs())
 						} else {
-							pv = validation.NewMultipleValue(p.GetName(), v, "body")
+							pv = validation.NewMultipleValue(p.GetName(), v, "body", p.GetAs())
 						}
 					}
 				}
 			}
-			ctx.Request.Input[p.GetName()] = pv
+			if pv != nil {
+				ctx.Request.Input[p.GetName()] = pv
+			}
 		}
 		for _, p := range o.params {
-			pv := ctx.Request.Input[p.GetName()]
-			if pv != nil {
-				errs := p.Validate(pv, ctx.Request)
-				if errs != nil {
+			pv, ok := ctx.Request.Input[p.GetName()]
+			if ok {
+				err := p.Validate(pv, ctx.Request)
+				if err != nil {
 					return
 				}
 			}

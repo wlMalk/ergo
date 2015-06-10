@@ -25,6 +25,7 @@ type Param struct {
 func NewParam(name string) *Param {
 	return &Param{
 		name: name,
+		as:   constants.PARAM_STRING,
 	}
 }
 
@@ -80,6 +81,10 @@ func (p *Param) Multiple() *Param {
 func (p *Param) As(as int) *Param {
 	p.as = as
 	return p
+}
+
+func (p *Param) GetAs() int {
+	return p.as
 }
 
 // If a Param is in path then it is required.

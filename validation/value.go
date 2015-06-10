@@ -16,22 +16,22 @@ type Value struct {
 	from             string
 }
 
-func NewValue(name string, value string, from string) *Value {
+func NewValue(name string, value string, from string, as int) *Value {
 	return &Value{
 		name:     name,
 		strValue: value,
 		from:     from,
-		as:       constants.PARAM_STRING,
+		as:       as,
 	}
 }
 
-func NewMultipleValue(name string, value []string, from string) *Value {
+func NewMultipleValue(name string, value []string, from string, as int) *Value {
 	return &Value{
 		name:             name,
 		strMultipleValue: value,
 		multiple:         true,
 		from:             from,
-		as:               constants.PARAM_STRING,
+		as:               as,
 	}
 }
 
