@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/wlMalk/ergo/constants"
+	"github.com/wlMalk/ergo/validation"
 )
 
 func preparePath(path string) string {
@@ -15,17 +16,17 @@ func preparePath(path string) string {
 }
 
 type paramer interface {
-	GetParams() map[string]*Param
-	setParams(map[string]*Param)
-	GetParamsSlice() []*Param
-	setParamsSlice(...*Param)
+	GetParams() map[string]*validation.Param
+	setParams(map[string]*validation.Param)
+	GetParamsSlice() []*validation.Param
+	setParamsSlice(...*validation.Param)
 }
 
 // addParams is additive, meaning that it will keep adding
 // params as long as they are different in names.
 // No two params can share the same name even if they are
 // in different places.
-func addParams(pa paramer, params []*Param) {
+func addParams(pa paramer, params []*validation.Param) {
 	ps := pa.GetParamsSlice()
 	for _, p := range params {
 		ps = append(ps, p)
@@ -42,7 +43,7 @@ func ignoreParams(pa paramer, params []string) {
 }
 
 func ignoreParamsBut(pa paramer, params []string) {
-	nparams := map[string]*Param{}
+	nparams := map[string]*validation.Param{}
 	ps := pa.GetParams()
 	for _, p := range params {
 		n, ok := ps[p]

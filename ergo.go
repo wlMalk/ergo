@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/wlMalk/ergo/constants"
+	"github.com/wlMalk/ergo/validation"
 )
 
 type Wrapper interface {
@@ -95,7 +96,7 @@ func (e *Ergo) Produces(mimes ...string) *Ergo {
 	return e
 }
 
-func (e *Ergo) Params(params ...*Param) *Ergo {
+func (e *Ergo) Params(params ...*validation.Param) *Ergo {
 	addParams(e.root, params)
 	return e
 }

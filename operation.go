@@ -2,6 +2,7 @@ package ergo
 
 import (
 	"github.com/wlMalk/ergo/constants"
+	"github.com/wlMalk/ergo/validation"
 )
 
 var (
@@ -28,7 +29,7 @@ type Operation struct {
 	name          string
 	description   string
 	middleware    []Middleware
-	params        map[string]*Param
+	params        map[string]*validation.Param
 	schemes       []string
 	consumes      []string
 	produces      []string
@@ -37,13 +38,10 @@ type Operation struct {
 }
 
 func NewOperation(handler Handler) *Operation {
-	if handler == nil {
-		panic("Handler cannot be nil")
+	o := &Operation{
+		params: map[string]*validation.Param{},
 	}
-	return &Operation{
-		Handler: handler,
-		params:  map[string]*Param{},
-	}
+	return o.SetHandler(handler)
 }
 
 func GET(function HandlerFunc) *Operation {
@@ -171,29 +169,29 @@ func (o *Operation) GetRoute() Router {
 	return o.route
 }
 
-func (o *Operation) Params(params ...*Param) *Operation {
+func (o *Operation) Params(params ...*validation.Param) *Operation {
 	addParams(o, params)
 	return o
 }
 
-func (o *Operation) GetParams() map[string]*Param {
+func (o *Operation) GetParams() map[string]*validation.Param {
 	return o.params
 }
 
-func (o *Operation) GetParamsSlice() []*Param {
-	var params []*Param
+func (o *Operation) GetParamsSlice() []*validation.Param {
+	var params []*validation.Param
 	for _, p := range o.params {
 		params = append(params, p)
 	}
 	return params
 }
 
-func (o *Operation) SetParamsSlice(params ...*Param) *Operation {
+func (o *Operation) SetParamsSlice(params ...*validation.Param) *Operation {
 	o.setParamsSlice(params...)
 	return o
 }
 
-func (o *Operation) SetParams(params map[string]*Param) *Operation {
+func (o *Operation) SetParams(params map[string]*validation.Param) *Operation {
 	o.setParams(params)
 	return o
 }
@@ -241,77 +239,77 @@ func (o *Operation) Validate(handler Handler) Handler {
 			ctx.Request.ParseForm()
 		}
 		for _, p := range o.params {
-			var pv *ParamValue
-			if p.inPath {
-				v, ok := ctx.Request.PathParams[p.name]
+			var pv *validation.Value
+			if p.IsInPath {
+				v, ok := ctx.Request.PathParams[p.GetName()]
 				if !ok {
 					return
 				}
-				pv = NewParamValue(p.name, v, "path")
-			} else if p.inQuery {
-				v, ok := q[p.name]
+				pv = validation.NewValue(p.GetName(), v, "path")
+			} else if p.IsInQuery {
+				v, ok := q[p.GetName()]
 				if !ok {
-					if p.required {
+					if p.IsRequired {
 						return
 					}
 				} else {
-					if !p.multiple {
-						pv = NewParamValue(p.name, v[0], "query")
+					if !p.IsMultiple {
+						pv = validation.NewValue(p.GetName(), v[0], "query")
 					} else {
-						pv = NewMultipleParamValue(p.name, v, "query")
+						pv = validation.NewMultipleValue(p.GetName(), v, "query")
 					}
 				}
-			} else if p.inHeader {
-				v, ok := h[p.name]
+			} else if p.IsInHeader {
+				v, ok := h[p.GetName()]
 				if !ok {
-					if p.required {
+					if p.IsRequired {
 						return
 					}
 				} else {
-					if !p.multiple {
-						pv = NewParamValue(p.name, v[0], "header")
+					if !p.IsMultiple {
+						pv = validation.NewValue(p.GetName(), v[0], "header")
 					} else {
-						pv = NewMultipleParamValue(p.name, v, "header")
+						pv = validation.NewMultipleValue(p.GetName(), v, "header")
 					}
 				}
-			} else if p.inBody { // decide what to do when content type is form-encoded
-				if p.file {
-					_, ok := ctx.Request.MultipartForm.File[p.name]
+			} else if p.IsInBody { // decide what to do when content type is form-encoded
+				if p.IsFile {
+					_, ok := ctx.Request.MultipartForm.File[p.GetName()]
 					if !ok {
-						if p.required {
+						if p.IsRequired {
 							return
 						}
 					} else {
 						//pv = NewFileParamValue(p.name, v[0], "header")
 					}
-				} else if !p.file && o.containsFiles {
-					_, ok := ctx.Request.MultipartForm.Value[p.name]
+				} else if !p.IsFile && o.containsFiles {
+					_, ok := ctx.Request.MultipartForm.Value[p.GetName()]
 					if !ok {
-						if p.required {
+						if p.IsRequired {
 							return
 						}
 					} else {
 						//pv = NewFileParamValue(p.name, v[0], "header")
 					}
 				} else {
-					v, ok := ctx.Request.Form[p.name]
+					v, ok := ctx.Request.Form[p.GetName()]
 					if !ok {
-						if p.required {
+						if p.IsRequired {
 							return
 						}
 					} else {
-						if !p.multiple {
-							pv = NewParamValue(p.name, v[0], "body")
+						if !p.IsMultiple {
+							pv = validation.NewValue(p.GetName(), v[0], "body")
 						} else {
-							pv = NewMultipleParamValue(p.name, v, "body")
+							pv = validation.NewMultipleValue(p.GetName(), v, "body")
 						}
 					}
 				}
 			}
-			ctx.Request.Input[p.name] = pv
+			ctx.Request.Input[p.GetName()] = pv
 		}
 		for _, p := range o.params {
-			pv := ctx.Request.Input[p.name]
+			pv := ctx.Request.Input[p.GetName()]
 			if pv != nil {
 				errs := p.Validate(pv, ctx.Request)
 				if errs != nil {
@@ -335,17 +333,17 @@ func (o *Operation) setProduces(mimes []string) {
 	o.produces = mimes
 }
 
-func (o *Operation) setParams(params map[string]*Param) {
+func (o *Operation) setParams(params map[string]*validation.Param) {
 	if params == nil {
-		params = make(map[string]*Param)
+		params = make(map[string]*validation.Param)
 	}
 	o.params = params
 }
 
-func (o *Operation) setParamsSlice(params ...*Param) {
-	paramsMap := map[string]*Param{}
+func (o *Operation) setParamsSlice(params ...*validation.Param) {
+	paramsMap := map[string]*validation.Param{}
 	for _, p := range params {
-		paramsMap[p.name] = p
+		paramsMap[p.GetName()] = p
 	}
 	o.setParams(paramsMap)
 }

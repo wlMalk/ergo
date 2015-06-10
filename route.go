@@ -2,6 +2,8 @@ package ergo
 
 import (
 	"strings"
+
+	"github.com/wlMalk/ergo/validation"
 )
 
 type Router interface {
@@ -15,7 +17,7 @@ type Route struct {
 	parent     *Route
 	path       string
 	routes     []*Route
-	params     map[string]*Param
+	params     map[string]*validation.Param
 	operations []*Operation
 	middleware []Middleware
 }
@@ -23,7 +25,7 @@ type Route struct {
 func NewRoute(path string) *Route {
 	return &Route{
 		path:   strings.ToLower(preparePath(path)),
-		params: map[string]*Param{},
+		params: map[string]*validation.Param{},
 	}
 }
 
@@ -121,29 +123,29 @@ func (r *Route) SetRoutes(routes []*Route) *Route {
 // Params add the given params to the params map in the route.
 // No two params can have the same name, even if the were
 // in different places.
-func (r *Route) Params(params ...*Param) *Route {
+func (r *Route) Params(params ...*validation.Param) *Route {
 	addParams(r, params)
 	return r
 }
 
-func (r *Route) GetParams() map[string]*Param {
+func (r *Route) GetParams() map[string]*validation.Param {
 	return r.params
 }
 
-func (r *Route) GetParamsSlice() []*Param {
-	var params []*Param
+func (r *Route) GetParamsSlice() []*validation.Param {
+	var params []*validation.Param
 	for _, p := range r.params {
 		params = append(params, p)
 	}
 	return params
 }
 
-func (r *Route) SetParamsSlice(params ...*Param) *Route {
+func (r *Route) SetParamsSlice(params ...*validation.Param) *Route {
 	r.setParamsSlice(params...)
 	return r
 }
 
-func (r *Route) SetParams(params map[string]*Param) *Route {
+func (r *Route) SetParams(params map[string]*validation.Param) *Route {
 	r.setParams(params)
 	return r
 }
@@ -255,17 +257,17 @@ func (r *Route) addRoute(route *Route) {
 	route.Use(r.middleware...)
 }
 
-func (r *Route) setParams(params map[string]*Param) {
+func (r *Route) setParams(params map[string]*validation.Param) {
 	if params == nil {
-		params = make(map[string]*Param)
+		params = make(map[string]*validation.Param)
 	}
 	r.params = params
 }
 
-func (r *Route) setParamsSlice(params ...*Param) {
-	paramsMap := map[string]*Param{}
+func (r *Route) setParamsSlice(params ...*validation.Param) {
+	paramsMap := map[string]*validation.Param{}
 	for _, p := range params {
-		paramsMap[p.name] = p
+		paramsMap[p.GetName()] = p
 	}
 	r.setParams(paramsMap)
 }
