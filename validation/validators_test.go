@@ -2,6 +2,7 @@ package validation_test
 
 import (
 	"github.com/wlMalk/ergo"
+	"github.com/wlMalk/ergo/constants"
 	. "github.com/wlMalk/ergo/validation"
 
 	"regexp"
@@ -22,22 +23,22 @@ func expectNot(t *testing.T, a interface{}, b interface{}) {
 
 func TestEq(t *testing.T) {
 	eq := Eq("ergo")
-	pv := NewValue("param", "ergo", "query")
+	pv := NewValue("param", "ergo", "query", constants.PARAM_STRING)
 	req := ergo.NewRequest(nil)
 	err := eq.Validate(pv, req)
 	expect(t, nil, err)
-	pv = NewValue("param", "rgo", "query")
+	pv = NewValue("param", "rgo", "query", constants.PARAM_STRING)
 	err = eq.Validate(pv, req)
 	expect(t, ErrEq.Err("param", "ergo").Error(), err.Error())
 }
 
 func TestRegexp(t *testing.T) {
 	re := Regexp(regexp.MustCompile("[ergo]{4}"))
-	pv := NewValue("param", "ergo", "query")
+	pv := NewValue("param", "ergo", "query", constants.PARAM_STRING)
 	req := ergo.NewRequest(nil)
 	err := re.Validate(pv, req)
 	expect(t, nil, err)
-	pv = NewValue("param", "rgo", "query")
+	pv = NewValue("param", "rgo", "query", constants.PARAM_STRING)
 	err = re.Validate(pv, req)
 	expect(t, ErrRegexp.Err("param", "[ergo]{4}").Error(), err.Error())
 }
@@ -46,7 +47,7 @@ func TestIf(t *testing.T) {
 	i := If(func(*Value, Requester) bool {
 		return false
 	}, Regexp(regexp.MustCompile("[ergo]{4}")))
-	pv := NewValue("param", "rgo", "query")
+	pv := NewValue("param", "rgo", "query", constants.PARAM_STRING)
 	req := ergo.NewRequest(nil)
 	err := i.Validate(pv, req)
 	expect(t, nil, err)
@@ -62,7 +63,7 @@ func TestIfElse(t *testing.T) {
 		return true
 	}, []Validator{Regexp(regexp.MustCompile("[ergo]{4}"))},
 		[]Validator{Eq("ergo")})
-	pv := NewValue("param", "rgo", "query")
+	pv := NewValue("param", "rgo", "query", constants.PARAM_STRING)
 	req := ergo.NewRequest(nil)
 	err := i.Validate(pv, req)
 	expect(t, ErrRegexp.Err("param", "[ergo]{4}").Error(), err.Error())
