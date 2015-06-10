@@ -204,7 +204,10 @@ func (r *Route) HandleDELETE(handler Handler) *Operation {
 // Operations does not alter the given operations in any way,
 // it does not even add route parameters.
 func (r *Route) Operations(operations ...*Operation) *Route {
-	r.operations = operations
+	for _, op := range operations {
+		o := op.Copy()
+		r.addOperation(o)
+	}
 	return r
 }
 
@@ -247,15 +250,15 @@ func (r *Route) ServeHTTP(ctx *Context) {
 func (r *Route) addOperation(o *Operation) {
 	o.route = r
 	o.Params(r.GetParamsSlice()...)
-	r.operations = append(r.operations, o)
 	o.Use(r.middleware...)
+	r.operations = append(r.operations, o)
 }
 
 func (r *Route) addRoute(route *Route) {
 	route.parent = r
 	route.Params(r.GetParamsSlice()...)
-	r.routes = append(r.routes, route)
 	route.Use(r.middleware...)
+	r.routes = append(r.routes, route)
 }
 
 func (r *Route) setParams(params map[string]*validation.Param) {
