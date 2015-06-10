@@ -44,12 +44,37 @@ func (v *Value) As() int {
 func (v *Value) Value() interface{} {
 	if v.value == nil {
 		return v.strValue
+		switch v.as {
+		case constants.PARAM_STRING:
+			v.String()
+		case constants.PARAM_INT:
+			v.Int()
+		case constants.PARAM_INT64:
+			v.Int64()
+		case constants.PARAM_FLOAT:
+			v.Float()
+		case constants.PARAM_FLOAT64:
+			v.Float64()
+		case constants.PARAM_BOOL:
+			v.Bool()
+		}
 	}
 	return v.value
 }
 
-func (v *Value) String() string {
+func (v *Value) RawString() string {
 	return v.strValue
+}
+
+func (v *Value) String() string {
+	if v.value != nil {
+		rv := v.value.(string)
+		return rv
+	}
+	if v.as == constants.PARAM_STRING {
+		v.value = v.strValue
+	}
+	return ""
 }
 
 func (v *Value) Bool() bool {
