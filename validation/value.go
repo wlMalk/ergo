@@ -21,6 +21,7 @@ func NewValue(name string, value string, from string) *Value {
 		name:     name,
 		strValue: value,
 		from:     from,
+		as:       constants.PARAM_STRING,
 	}
 }
 
@@ -30,6 +31,7 @@ func NewMultipleValue(name string, value []string, from string) *Value {
 		strMultipleValue: value,
 		multiple:         true,
 		from:             from,
+		as:               constants.PARAM_STRING,
 	}
 }
 
@@ -43,7 +45,6 @@ func (v *Value) As() int {
 
 func (v *Value) Value() interface{} {
 	if v.value == nil {
-		return v.strValue
 		switch v.as {
 		case constants.PARAM_STRING:
 			v.String()
@@ -73,6 +74,7 @@ func (v *Value) String() string {
 	}
 	if v.as == constants.PARAM_STRING {
 		v.value = v.strValue
+		return v.strValue
 	}
 	return ""
 }
