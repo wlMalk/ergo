@@ -207,6 +207,27 @@ func (o *Operation) IgnoreParamsBut(params ...string) *Operation {
 	return o
 }
 
+func (o *Operation) SetHandler(handler Handler) *Operation {
+	if handler == nil {
+		panic("Handler cannot be nil")
+	}
+	o.Handler = handler
+	return o
+}
+
+func (o *Operation) Copy() *Operation {
+	op := NewOperation(o.Handler)
+	op.method = o.method
+	op.description = o.description
+	op.middleware = o.middleware
+	op.params = o.params
+	op.schemes = o.schemes
+	op.consumes = o.consumes
+	op.produces = o.consumes
+	op.containsFiles = o.containsFiles
+	return o
+}
+
 func (o *Operation) Validate(handler Handler) Handler {
 	return HandlerFunc(func(ctx *Context) {
 
