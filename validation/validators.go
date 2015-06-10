@@ -5,25 +5,25 @@ import (
 )
 
 func Eq(a interface{}) Validator {
-	return ValidatorFunc(func(v Valuer, r Requester) error {
+	return NewFuncValidator(func(v *Value, r Requester) error {
 		if a != v.Value() {
-			return ErrEq.Fmt([]interface{}{v.Name(), a}...)
+			return ErrEq.Err([]interface{}{v.Name(), a}...)
 		}
 		return nil
-	})
+	}, MsgEq.Msg(a))
 }
 
 func Regexp(p *regexp.Regexp) Validator {
-	return ValidatorFunc(func(v Valuer, r Requester) error {
+	return NewFuncValidator(func(v *Value, r Requester) error {
 		if !p.MatchString(v.String()) {
-			return ErrRegexp.Fmt([]interface{}{v.Name(), p.String()}...)
+			return ErrRegexp.Err([]interface{}{v.Name(), p.String()}...)
 		}
 		return nil
-	})
+	}, MsgRegexp.Msg(p.String()))
 }
 
-func If(f func(Valuer, Requester) bool, validators ...Validator) Validator {
-	return ValidatorFunc(func(v Valuer, r Requester) error {
+func If(f func(*Value, Requester) bool, validators ...Validator) Validator {
+	return ValidatorFunc(func(v *Value, r Requester) error {
 		if f(v, r) {
 			for _, va := range validators {
 				err := va.Validate(v, r)
@@ -36,8 +36,8 @@ func If(f func(Valuer, Requester) bool, validators ...Validator) Validator {
 	})
 }
 
-func IfElse(f func(Valuer, Requester) bool, tValidators []Validator, fValidators []Validator) Validator {
-	return ValidatorFunc(func(v Valuer, r Requester) error {
+func IfElse(f func(*Value, Requester) bool, tValidators []Validator, fValidators []Validator) Validator {
+	return ValidatorFunc(func(v *Value, r Requester) error {
 		if f(v, r) {
 			for _, va := range tValidators {
 				err := va.Validate(v, r)
