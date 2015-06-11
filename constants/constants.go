@@ -25,4 +25,5 @@ const (
 	MIME_JSON = "application/json"
 
 	HEADER_Accept                        = "Accept"
+	HEADER_ContentType                   = "Content-Type"
 )
