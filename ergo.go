@@ -13,9 +13,11 @@ type Wrapper interface {
 }
 
 var (
+	DefMimeType = constants.MIME_JSON
+
 	DefSchemes  = []string{constants.SCHEME_HTTP}
-	DefConsumes = []string{constants.MIME_JSON}
-	DefProduces = []string{constants.MIME_JSON}
+	DefConsumes = []string{DefMimeType}
+	DefProduces = []string{DefMimeType}
 )
 
 type Ergoer interface {
