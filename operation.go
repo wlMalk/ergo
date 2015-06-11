@@ -237,15 +237,13 @@ func (o *Operation) Validate(handler Handler) Handler {
 			return
 		}
 
+		// check scheme
 		var schemeAccepted bool
 		if ctx.Request.URL.Scheme == "" {
 			ctx.Request.URL.Scheme = constants.SCHEME_HTTP
 		}
-		if o.schemes != nil {
-			schemeAccepted = containsString(o.schemes, ctx.Request.URL.Scheme)
-		} else {
-			schemeAccepted = containsString(o.ergo.schemes, ctx.Request.URL.Scheme)
-		}
+
+		schemeAccepted = containsString(o.schemes, ctx.Request.URL.Scheme)
 		if !schemeAccepted {
 			return
 		}

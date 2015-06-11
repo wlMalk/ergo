@@ -147,6 +147,15 @@ func (e *Ergo) PrepareRouter() {
 		for _, o := range ops {
 			o.Handler = getHandler(o.Handler, append(o.middleware, MiddlewareFunc(o.Validate)))
 			o.ergo = e
+			if o.schemes == nil {
+				o.schemes = e.schemes
+			}
+			if o.consumes == nil {
+				o.consumes = e.consumes
+			}
+			if o.produces == nil {
+				o.produces = e.produces
+			}
 		}
 		e.operations = append(e.operations, ops...)
 	}
