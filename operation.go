@@ -1,6 +1,9 @@
 package ergo
 
 import (
+	"net/http"
+	"strings"
+
 	"github.com/wlMalk/ergo/constants"
 	"github.com/wlMalk/ergo/validation"
 )
@@ -233,9 +236,11 @@ func (o *Operation) Validate(handler Handler) Handler {
 
 		// check for all things
 
-		if ctx.Request.Method != o.method {
-			return
-		}
+		// not necessary as it's already been checked for in Route
+		// if ctx.Request.Method != o.method {
+		// 	//
+		// 	return
+		// }
 
 		// check scheme
 		var schemeAccepted bool
@@ -247,6 +252,33 @@ func (o *Operation) Validate(handler Handler) Handler {
 		if !schemeAccepted {
 			return
 		}
+
+		// check accept header
+		var encoding string
+		for _, acceptMime := range strings.Split(ctx.Request.Header.Get(constants.HEADER_Accept), ",") {
+			mime := strings.Trim(strings.Split(acceptMime, ";")[0], " ")
+			if 0 == len(mime) || mime == "*/*" {
+				if len(o.produces) == 0 {
+					encoding = DefMimeType
+					break
+				} else {
+					encoding = o.produces[0]
+					break
+				}
+			} else {
+				if containsString(o.produces, mime) {
+					encoding = mime
+					break
+				}
+			}
+		}
+
+		if len(encoding) == 0 {
+			ctx.Response.WriteString(http.StatusNotAcceptable, "406: Not Acceptable")
+			return
+		}
+
+		ctx.Response.Encoding = encoding
 
 		ctx.Ergo = o.ergo
 		ctx.Operation = o
