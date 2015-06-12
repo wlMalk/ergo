@@ -79,40 +79,112 @@ func (v *Value) String() string {
 	return ""
 }
 
-func (v *Value) Bool() bool {
+func (v *Value) BoolE() (bool, error) {
 	if v.value != nil {
-		rv := v.value.(bool)
-		return rv
+		rv, ok := v.value.(bool)
+		if ok {
+			return rv, nil
+		}
 	}
 	if v.as == constants.PARAM_BOOL {
-		rv, _ := strconv.ParseBool(v.strValue)
-		v.value = rv
-		return rv
+		rv, err := strconv.ParseBool(v.strValue)
+		if err == nil {
+			v.value = rv
+		}
+		return rv, err
 	}
-	return false
+	return false, nil
+}
+
+func (v *Value) Bool() bool {
+	rv, _ := v.BoolE()
+	return rv
+}
+
+func (v *Value) IntE() (int, error) {
+	if v.value != nil {
+		rv, ok := v.value.(int)
+		if ok {
+			return rv, nil
+		}
+	}
+	if v.as == constants.PARAM_INT {
+		rv, err := strconv.Atoi(v.strValue)
+		if err == nil {
+			v.value = rv
+		}
+		return rv, err
+	}
+	return 0, nil
 }
 
 func (v *Value) Int() int {
+	rv, _ := v.IntE()
+	return rv
+}
+
+func (v *Value) Int64E() (int64, error) {
 	if v.value != nil {
-		rv := v.value.(int)
-		return rv
+		rv, ok := v.value.(int64)
+		if ok {
+			return rv, nil
+		}
 	}
-	if v.as == constants.PARAM_INT {
-		rv, _ := strconv.Atoi(v.strValue)
-		v.value = rv
-		return rv
+	if v.as == constants.PARAM_INT64 {
+		rv, err := strconv.ParseInt(v.strValue, 10, 64)
+		if err == nil {
+			v.value = rv
+		}
+		return rv, err
 	}
-	return 0
+	return 0, nil
 }
 
 func (v *Value) Int64() int64 {
-	return 0
+	rv, _ := v.Int64E()
+	return rv
+}
+
+func (v *Value) FloatE() (float32, error) {
+	if v.value != nil {
+		rv, ok := v.value.(float32)
+		if ok {
+			return rv, nil
+		}
+	}
+	if v.as == constants.PARAM_FLOAT {
+		rv, err := strconv.ParseFloat(v.strValue, 32)
+		if err == nil {
+			v.value = rv
+		}
+		return float32(rv), err
+	}
+	return 0, nil
 }
 
 func (v *Value) Float() float32 {
-	return 0
+	rv, _ := v.FloatE()
+	return rv
+}
+
+func (v *Value) Float64E() (float64, error) {
+	if v.value != nil {
+		rv, ok := v.value.(float64)
+		if ok {
+			return rv, nil
+		}
+	}
+	if v.as == constants.PARAM_FLOAT64 {
+		rv, err := strconv.ParseFloat(v.strValue, 64)
+		if err == nil {
+			v.value = rv
+		}
+		return rv, err
+	}
+	return 0, nil
 }
 
 func (v *Value) Float64() float64 {
-	return 0
+	rv, _ := v.Float64E()
+	return rv
 }
