@@ -275,4 +275,3 @@ func (r *Route) setParamsSlice(params ...*validation.Param) {
 	}
 	r.setParams(paramsMap)
 }
-
